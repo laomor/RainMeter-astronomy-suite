@@ -1,0 +1,2 @@
+[Variables]
+BodyType=Sun
