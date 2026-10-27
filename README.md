@@ -22,7 +22,7 @@
 </tr>
 </table>
 
-> 截图保存在 `docs/` 文件夹中。
+> 更多的截图保存在 `EffectPreviewImage_*/` 文件夹中。
 
 ---
 
@@ -34,7 +34,7 @@
 ├── GlobePicture.zip                # 360张地球图片的压缩包（方便单独下载，仓库内已有解压版）
 ├── Background/                     # 皮肤背景图
 ├── icon/                           # 太阳、月亮及标记图标
-├── docs/                           # 效果预览图
+├── EffectPreviewImage_*/           # 效果预览图
 ├── Event Time Case/                # 现成的示例数据（4个 txt 文件）
 ├── GlobePicture/                   # 360张地球自旋图片序列 (globe_000 ~ 359)
 ├── Script_Globe/                   # Globe 系列皮肤的 Lua 脚本
