@@ -1,4 +1,4 @@
-# Rainmeter Sun & Moon Tracker
+# Astronomy Suite
 
 > 把日月升降时间变成四种可视化视图：**地球光照球、天体轨迹、事件时间轴、视位置模拟**。
 > 核心不依赖 Rainmeter。本质是：**事件时间序列 + 本地经度 → 几何公式 → 图像**。
