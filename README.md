@@ -15,14 +15,14 @@
 <td width="25%"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" alt="地球光照球"><br><sub></b>2026-10-27_21-50</sub></td>
 <tr>
 <tr>
-<td width="50%"><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
+<td width="25%"><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
 </tr>
 <tr>
 <tr>
 <tr>
 <tr>
 <tr>
-<td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
+<td width="25%"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
 </tr>
 </table>
 
