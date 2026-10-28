@@ -22,9 +22,7 @@
 <td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub></b>2026-10-28_09-00.png</sub></td>
 <tr>
 <tr>
-<tr>
-<tr>
-<td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
+<td><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
 </tr>
 </table>
 
