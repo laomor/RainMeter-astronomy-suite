@@ -17,6 +17,9 @@
 <td><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
 </tr>
 <tr>
+<td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub></b>2026-10-28_09-00.png</sub></td>
+<td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub></b>2026-10-28_09-00.png</sub></td>
+<td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub></b>2026-10-28_09-00.png</sub></td>
 <tr>
 <tr>
 <tr>
