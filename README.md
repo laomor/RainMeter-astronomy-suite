@@ -9,8 +9,8 @@
 
 <table>
 <tr>
-<td width="100%"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" alt="地球光照球"><br><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
-<td width="100%"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" alt="地球光照球"><br><sub></b>2026-10-27_21-50</sub></td>
+<td width="50%"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" alt="地球光照球"><br><sub></b>2026-10-27_21-50</sub></td>
+<td width="50%"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" alt="地球光照球"><br><sub></b>2026-10-27_21-50</sub></td>
 <tr>
 <tr>
 <td width="50%"><br><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
