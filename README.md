@@ -12,7 +12,7 @@
 <td width="50%"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" alt="地球光照球"><br><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
 <tr>
 <tr>
-<td width="50%"><img src="docs/preview-trajectory.png" alt="天体轨迹"><br><sub><b>天体轨迹</b> — 24 小时连续抛物线运动，含升落标记</sub></td>
+<td width="50%"><img src="EffectPreviewImage_Trajectory/Trajectory_2026-10-28_09-02.png" alt="天体轨迹"><br><sub><b>天体轨迹</b> — 24 小时连续抛物线运动，含升落标记</sub></td>
 </tr>
 <tr>
 <td><img src="EffectPreviewImage_Event/Event_2026-10-28_09-01.png" alt="事件追踪"><br><sub><b>事件追踪</b> — 以当前时间为中心滚动展示未来 5 个事件</sub></td>
