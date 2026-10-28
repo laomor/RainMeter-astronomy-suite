@@ -18,7 +18,7 @@
 <td><img src="EffectPreviewImage_Event/Event_2026-10-28_09-01.png" alt="事件追踪"><br><sub><b>事件追踪</b> — 以当前时间为中心滚动展示未来 5 个事件</sub></td>
 <tr>
 <tr>
-<td><img src="docs/preview-position.png" alt="位置模拟"><br><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
+<td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" alt="位置模拟"><br><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
 </tr>
 </table>
 
