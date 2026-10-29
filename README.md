@@ -95,9 +95,15 @@ Rainmeter/Skins/Astronomy Suite/
 ```
 
 ### 第三步：准备天文数据
-皮肤读取的是纯文本数据，放在 `C:\Users\Public\Documents\Rainmeter Data\。`
-1. 将仓库 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 复制到 `C:\Users\Public\Documents\`。
-2. 填入 API 密钥运行一次。随后双击 `AstronomicalEvents.xml` 导入任务计划，实现每 4 小时自动拉取。
+
+皮肤读取的是纯文本数据，统一存放在 `C:\Users\Public\Documents\Rainmeter Data\` 目录下。
+
+1. 将仓库 `Users Public Documents` 文件夹里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 复制到 `C:\Users\Public\Documents\` 目录下。
+2. **申请 API 密钥**：
+   - [和风天气 API 控制台](https://id.qweather.com/#/login)
+   - [百度地图 API 控制台](https://lbsyun.baidu.com/apiconsole/becomedev/selection)
+3. 用记事本打开 `WeatherApiKeys.json`，填入刚刚申请到的 API 密钥并保存。
+4. 右键 `AstronomicalEvents.ps1`，选择“使用 PowerShell 运行”测试能否正常生成数据；随后双击 `AstronomicalEvents.xml` 导入 Windows 任务计划，实现每 4 小时自动拉取。
 
 ### 第四步：加载皮肤
 刷新 Rainmeter，在管理器中展开 Astronomy Suite，加载你想要的皮肤即可：
