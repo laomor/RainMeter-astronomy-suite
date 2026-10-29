@@ -12,18 +12,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-
-      - name: Setup PowerShell
-        run: |
-          # 使用官方脚本安装 PowerShell，避免包名问题
-          sudo apt-get update
-          sudo apt-get install -y wget apt-transport-https software-properties-common
-          wget -q https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb
-          sudo dpkg -i packages-microsoft-prod.deb
-          sudo apt-get update
-          sudo apt-get install -y powershell
 
       - name: Prepare Config and Paths
         shell: pwsh
@@ -31,26 +19,21 @@ jobs:
           WEATHER_KEY: ${{ secrets.WEATHER_API_KEY }}
           BAIDU_KEY: ${{ secrets.BAIDU_AK }}
         run: |
-          # 1. 动态生成 WeatherApiKeys.json
           $config = @{
               weatherApiKey = $env:WEATHER_KEY
               baiduAk = $env:BAIDU_KEY
           } | ConvertTo-Json
           Set-Content -Path "Users Public Documents/WeatherApiKeys.json" -Value $config
 
-          # 2. 动态修改脚本中的输出路径
           $scriptPath = "Users Public Documents/AstronomicalEvents.ps1"
           $content = Get-Content $scriptPath -Raw
-          # 替换输出路径为当前仓库目录
           $content = $content -replace '\$publicDocuments = "C:\\Users\\Public\\Documents\\Rainmeter Data"', '$publicDocuments = Join-Path (Get-Location) "Event Time Case"'
-          # 替换错误日志路径为当前目录
           $content = $content -replace '\$errorLogPath = Join-Path \(\[Environment\]::GetFolderPath\("Desktop"\)\) "SunMoonDataError.log"', '$errorLogPath = Join-Path (Get-Location) "SunMoonDataError.log"'
           Set-Content -Path $scriptPath -Value $content
 
       - name: Run Astronomical Events Script
         shell: pwsh
         run: |
-          # 设置错误处理偏好，并执行脚本
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           try {
