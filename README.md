@@ -96,16 +96,19 @@ Rainmeter/Skins/Astronomy Suite/
 
 ### 第三步：准备天文数据
 
-皮肤读取的是纯文本数据，统一存放在 `C:\Users\Public\Documents\Rainmeter Data\` 目录下。
+皮肤读取的是纯文本数据，统一存放在 `C:\Users\Public\Documents\Rainmeter Data\` 目录下。请根据你的需求选择以下一种方式：
 
+#### 🟢 方案 A：开箱即用（只想看效果）
+直接下载本仓库 `Event Time Case` 文件夹内的 4 个 `.txt` 文件，复制到 `Rainmeter Data` 目录中即可。
+> **提示**：该文件夹的数据由 GitHub Actions 每天自动更新。但请注意，云端服务器默认使用的是**北京经度**。
+
+#### 🔵 方案 B：本地自动化（长期使用，自定义城市）
 1. 将仓库 `Users Public Documents` 文件夹里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 复制到 `C:\Users\Public\Documents\` 目录下。
-2. **申请 API 密钥**：
+2. **申请免费 API 密钥**：
    - [和风天气 API 控制台](https://id.qweather.com/#/login)
    - [百度地图 API 控制台](https://lbsyun.baidu.com/apiconsole/becomedev/selection)
-3. 用记事本打开 `WeatherApiKeys.json`，填入刚刚申请到的 API 密钥并保存。
-4. 右键 `AstronomicalEvents.ps1`，选择“使用 PowerShell 运行”测试能否正常生成数据；随后双击 `AstronomicalEvents.xml` 导入 Windows 任务计划，实现每 4 小时自动拉取。
-> **快捷测试**：如果你只是想看效果，可以直接将仓库 `Event Time Case` 文件夹内的 4 个 `.txt` 文件复制到 `Rainmeter Data` 目录中，跳过上述 API 配置和脚本运行步骤。
-> <br>`本仓库配置了 GitHub Actions 自动更新但使用的是北京的经度`
+3. 用记事本打开 `WeatherApiKeys.json`，填入申请到的密钥并保存。
+4. 右键 `AstronomicalEvents.ps1` 选择“使用 PowerShell 运行”。确认能正常生成数据后，双击 `AstronomicalEvents.xml` 导入 Windows 任务计划，实现本地每 4 小时自动拉取更新。
 
 ### 第四步：加载皮肤
 刷新 Rainmeter，在管理器中展开 Astronomy Suite，加载你想要的皮肤即可：
