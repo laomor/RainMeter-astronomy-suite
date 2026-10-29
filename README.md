@@ -104,6 +104,8 @@ Rainmeter/Skins/Astronomy Suite/
    - [百度地图 API 控制台](https://lbsyun.baidu.com/apiconsole/becomedev/selection)
 3. 用记事本打开 `WeatherApiKeys.json`，填入刚刚申请到的 API 密钥并保存。
 4. 右键 `AstronomicalEvents.ps1`，选择“使用 PowerShell 运行”测试能否正常生成数据；随后双击 `AstronomicalEvents.xml` 导入 Windows 任务计划，实现每 4 小时自动拉取。
+> **快捷测试**：如果你只是想看效果，可以直接将仓库 `Event Time Case` 文件夹内的 4 个 `.txt` 文件复制到 `Rainmeter Data` 目录中，跳过上述 API 配置和脚本运行步骤。
+> `本仓库配置了 GitHub Actions 自动更新但使用的是北京的经度`
 
 ### 第四步：加载皮肤
 刷新 Rainmeter，在管理器中展开 Astronomy Suite，加载你想要的皮肤即可：
