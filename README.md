@@ -52,23 +52,58 @@
 
 ## 快速部署（Rainmeter）
 
-**前置**：Windows 10/11、Rainmeter 4.5+
+### 第一步：创建皮肤目录
+1. 右键点击系统托盘的 Rainmeter 图标，选择 **“皮肤” → “打开皮肤目录”**。
+2. 在打开的 `Skins` 文件夹中，新建一个名为 **`Astronomy Suite`** 的文件夹。
 
-### 第一步：准备数据（二选一）
-- **方案 A（只想看效果）**：将 `Event Time Case` 文件夹内的 4 个 txt 文件，直接复制到 `C:\Users\Public\Documents\Rainmeter Data\` 目录下（没有该目录请手动新建）。
-- **方案 B（长期使用）**：将 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 复制到 `C:\Users\Public\Documents\` 下，填入 API 密钥，然后运行一次。之后双击 `AstronomicalEvents.xml` 导入任务计划实现每 4 小时自动刷新。
+### 第二步：按结构组合文件
+从本仓库下载文件，并严格按照以下结构放入 `Astronomy Suite` 文件夹中。
+*(注：`@Resources` 是 Rainmeter 的共享资源目录，所有 `.ini` 都可以读取里面的图片和 Lua 脚本)*
 
-### 第二步：部署 Rainmeter 皮肤
-1. 将本仓库下载（或克隆）到 Rainmeter 皮肤目录：
-   ```powershell
-   cd "$env:USERPROFILE\Documents\Rainmeter\Skins"
-   git clone https://github.com/<yourname>/rainmeter-sun-moon-tracker.git
-   ```
-2. 确保 `GlobePicture` 文件夹内包含 360 张图片。（如果你单独下载了 `GlobePicture.zip`，请将其解压并改名为 `GlobePicture`）。
-3. 刷新 Rainmeter，在管理器中加载任意皮肤：
-   - `Skins_Globe\Globe_Combine.ini` （日月双球）
-   - `Skins_SunMoonTracker\Trajectory Viewer.ini` （轨迹视图）
+```text
+.
+Rainmeter/Skins/Astronomy Suite/
+│
+├── @Resources/                     # 共享资源（图片、脚本）
+│   ├── globe/                      # 解压 GlobePicture.zip 到这里 (360张图)
+│   │   ├── globe_000.png
+│   │   ├── globe_001.png
+│   │   └── ... (一直到 globe_359.png)
+│   │
+│   ├── Background_double.png       # 来自仓库的 Background/ 文件夹
+│   ├── Tracker_mark.png            # 来自仓库的 icon/ 文件夹
+│   ├── Tracker_moon.png            # 来自仓库的 icon/ 文件夹
+│   ├── Tracker_sun.png             # 来自仓库的 icon/ 文件夹
+│   │
+│   ├── Globe.lua                   # 来自仓库的 Script_Globe/ 文件夹
+│   ├── Globe_Combine.lua           # 来自仓库的 Script_Globe/ 文件夹
+│   ├── Event Tracker.lua           # 来自仓库的 Script_SunMoonTracker/ 文件夹
+│   ├── Position Simulator.lua      # 来自仓库的 Script_SunMoonTracker/ 文件夹
+│   └── Trajectory Viewer.lua       # 来自仓库的 Script_SunMoonTracker/ 文件夹
+│
+├── Globe/                          # 地球光照球皮肤（来自 Skins_Globe/）
+│   ├── BodyType.inc
+│   ├── Globe.ini
+│   ├── Globe_Combine.ini
+│   ├── Globe_Moon.ini
+│   └── Globe_Sun.ini
+│
+└── SunMoonTracker/                 # 轨迹与事件皮肤（来自 Skins_SunMoonTracker/）
+    ├── Event Tracker.ini
+    ├── Position Simulator.ini
+    └── Trajectory Viewer.ini
+```
 
+### 第三步：准备天文数据
+皮肤读取的是纯文本数据，放在 `C:\Users\Public\Documents\Rainmeter Data\。`
+1. 将仓库 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 复制到 `C:\Users\Public\Documents\`。
+2. 填入 API 密钥运行一次。随后双击 `AstronomicalEvents.xml` 导入任务计划，实现每 4 小时自动拉取。
+
+### 第四步：加载皮肤
+刷新 Rainmeter，在管理器中展开 Astronomy Suite，加载你想要的皮肤即可：
+
+· Globe\Globe_Combine.ini （日月双球）
+· SunMoonTracker\Trajectory Viewer.ini （轨迹视图）
 ---
 
 ## 核心原理（平台无关）
