@@ -21,64 +21,56 @@ jobs:
           WEATHER_KEY: ${{ secrets.WEATHER_API_KEY }}
           BAIDU_KEY: ${{ secrets.BAIDU_AK }}
         run: |
-          # 检查 Secrets 是否读取成功
-          if ([string]::IsNullOrWhiteSpace($env:WEATHER_KEY)) {
-              Write-Host "警告: WEATHER_API_KEY 没有配置！"
-          }
-
-          # 1. 生成 WeatherApiKeys.json
+          # 1. 写入密钥
           $config = @{
-              weatherApiKey = $env:WEATHER_KEY
-              baiduAk = $env:BAIDU_KEY
+              weatherApiKey = "$env:WEATHER_KEY"
+              baiduAk = "$env:BAIDU_KEY"
           } | ConvertTo-Json
-          Set-Content -Path "Users Public Documents/WeatherApiKeys.json" -Value $config
+          Set-Content -Path "./Users Public Documents/WeatherApiKeys.json" -Value $config
 
-          # 2. 修改脚本路径
-          $scriptPath = "Users Public Documents/AstronomicalEvents.ps1"
+          # 2. 读取并修改脚本
+          $scriptPath = "./Users Public Documents/AstronomicalEvents.ps1"
           $content = Get-Content $scriptPath -Raw
           
-          $oldPath = '$publicDocuments = "C:\Users\Public\Documents\Rainmeter Data"'
-          $newPath = '$publicDocuments = Join-Path (Get-Location) "Event Time Case"'
-          $content = $content.Replace($oldPath, $newPath)
+          # 替换输出路径为当前仓库的 Event Time Case
+          $content = $content.Replace('$publicDocuments = "C:\Users\Public\Documents\Rainmeter Data"', '$publicDocuments = Join-Path (Get-Location) "Event Time Case"')
           
-          $oldLog = '$errorLogPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "SunMoonDataError.log"'
-          $newLog = '$errorLogPath = Join-Path (Get-Location) "SunMoonDataError.log"'
-          $content = $content.Replace($oldLog, $newLog)
+          # 替换错误日志路径为当前目录
+          $content = $content.Replace('$errorLogPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "SunMoonDataError.log"', '$errorLogPath = Join-Path (Get-Location) "SunMoonDataError.log"')
 
-          # 强制在脚本最后打印输出目录的内容
-          $content = $content + "`n`nWrite-Host '=== 脚本运行结束，当前输出目录内容 ==='`nGet-ChildItem -Path `$publicDocuments | Select-Object Name, Length | Format-Table"
-
+          # 【核心】彻底阉割公网IP定位逻辑，强制指定为北京 (101010100)，避免海外服务器定位报错
+          $content = $content -replace '(?s)function Get-CityCode \{.*?return \$cityCode\s*\}', 'function Get-CityCode { return "101010100" }'
+          
           Set-Content -Path $scriptPath -Value $content
 
       - name: Run Astronomical Events Script
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Continue'
-          # 直接运行脚本，不捕获错误，让日志输出到控制台
-          ./"Users Public Documents/AstronomicalEvents.ps1"
-          
-          # 检查错误日志
-          if (Test-Path "SunMoonDataError.log") {
-              Write-Host "=== 发现错误日志 ==="
-              Get-Content "SunMoonDataError.log"
+          # 使用 pwsh -File 的形式执行，并捕获所有输出
+          Write-Host "==== 开始执行 ===="
+          try {
+              pwsh -File "Users Public Documents/AstronomicalEvents.ps1"
+          } catch {
+              Write-Host "❌ 脚本执行失败: $_" -ForegroundColor Red
+          }
+          Write-Host "==== 执行结束，检查文件 ===="
+          if (Test-Path "Event Time Case") {
+              Get-ChildItem "Event Time Case" | Select-Object Name, Length | Format-Table
           } else {
-              Write-Host "=== 没有发现错误日志 ==="
+              Write-Host "❌ 未找到 Event Time Case 文件夹！"
           }
 
-      # 无论脚本成功失败，强制生成一个状态文件，确保 Git 有东西可以提交
+      # 无论成功失败，强制生成一个状态文件，防止无内容提交被跳过
       - name: Force Generate Status File
         run: |
-          echo "Last run: $(date -u)" > Event_Time_Case_Status.txt
+          date -u > Event_Time_Case_Status.txt
           if [ -f "SunMoonDataError.log" ]; then
-            echo "Status: FAILED. See log below." >> Event_Time_Case_Status.txt
+            echo "=== 发现错误日志 ===" >> Event_Time_Case_Status.txt
             cat "SunMoonDataError.log" >> Event_Time_Case_Status.txt
-          else
-            echo "Status: SUCCESS (Or no error generated)." >> Event_Time_Case_Status.txt
           fi
 
       - name: Commit and Push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: auto-update data or log status"
-          # 把 txt 和 log 都提交
           file_pattern: 'Event Time Case/*.txt SunMoonDataError.log Event_Time_Case_Status.txt'
