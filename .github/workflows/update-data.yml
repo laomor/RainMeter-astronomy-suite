@@ -1,0 +1,45 @@
+name: Update Sun & Moon Data
+
+on:
+  schedule:
+    # 每天 UTC 0点 (北京时间早上8点) 运行一次
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 支持在Actions页面手动点击运行
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # 确保有权限提交回仓库
+          persist-credentials: true
+
+      - name: Setup PowerShell
+        uses: actions/setup-powershell@v2
+        with:
+          # 如果你的脚本需要特定版本的 PowerShell，可以在这里指定
+          # 但通常不需要，Ubuntu自带pwsh
+          # 例如: pwsh-version: '7.2'
+          # (可选，如果默认版本够用可删除此步骤)
+
+      - name: Run Astronomical Events Script
+        shell: pwsh
+        run: |
+          # 这里需要根据你的脚本位置和配置进行调整
+          # 假设脚本在仓库的 'Users Public Documents' 文件夹中
+          # 并且它会自行读取同目录下的 WeatherApiKeys.json
+          # 如果脚本需要特定参数，请在此处添加
+          ./'Users Public Documents/AstronomicalEvents.ps1'
+          # 注意：脚本应将数据输出到 'Event Time Case' 文件夹
+          # 而不是 'C:\Users\Public\Documents\Rainmeter Data\'
+          # 你可能需要在脚本中增加一个条件，根据环境变量或当前路径来决定输出目录
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-update sun & moon data"
+          # 仅当 'Event Time Case' 目录有变化时才提交
+          file_pattern: 'Event Time Case/*.txt'
