@@ -16,61 +16,42 @@ jobs:
           persist-credentials: true
 
       - name: Prepare Config and Paths
-        shell: pwsh
         env:
           WEATHER_KEY: ${{ secrets.WEATHER_API_KEY }}
           BAIDU_KEY: ${{ secrets.BAIDU_AK }}
         run: |
-          # 1. 写入密钥
-          $config = @{
-              weatherApiKey = "$env:WEATHER_KEY"
-              baiduAk = "$env:BAIDU_KEY"
-          } | ConvertTo-Json
-          Set-Content -Path "./Users Public Documents/WeatherApiKeys.json" -Value $config
+          # 1. 生成 json 配置文件
+          echo "{" > "Users Public Documents/WeatherApiKeys.json"
+          echo "  \"weatherApiKey\": \"$WEATHER_KEY\"," >> "Users Public Documents/WeatherApiKeys.json"
+          echo "  \"baiduAk\": \"$BAIDU_KEY\"" >> "Users Public Documents/WeatherApiKeys.json"
+          echo "}" >> "Users Public Documents/WeatherApiKeys.json"
 
-          # 2. 读取并修改脚本
-          $scriptPath = "./Users Public Documents/AstronomicalEvents.ps1"
-          $content = Get-Content $scriptPath -Raw
-          
-          # 替换输出路径为当前仓库的 Event Time Case
-          $content = $content.Replace('$publicDocuments = "C:\Users\Public\Documents\Rainmeter Data"', '$publicDocuments = Join-Path (Get-Location) "Event Time Case"')
-          
-          # 替换错误日志路径为当前目录
-          $content = $content.Replace('$errorLogPath = Join-Path ([Environment]::GetFolderPath("Desktop")) "SunMoonDataError.log"', '$errorLogPath = Join-Path (Get-Location) "SunMoonDataError.log"')
-
-          # 【核心】彻底阉割公网IP定位逻辑，强制指定为北京 (101010100)，避免海外服务器定位报错
-          $content = $content -replace '(?s)function Get-CityCode \{.*?return \$cityCode\s*\}', 'function Get-CityCode { return "101010100" }'
-          
-          Set-Content -Path $scriptPath -Value $content
+          # 2. 修改输出路径和城市代码
+          sed -i 's|\$publicDocuments = "C:\\Users\\Public\\Documents\\Rainmeter Data"|\$publicDocuments = "./Event Time Case"|g' "Users Public Documents/AstronomicalEvents.ps1"
+          sed -i 's|function Get-CityCode {|function Get-CityCode { return "101010100";|g' "Users Public Documents/AstronomicalEvents.ps1"
 
       - name: Run Astronomical Events Script
         shell: pwsh
         run: |
-          # 使用 pwsh -File 的形式执行，并捕获所有输出
-          Write-Host "==== 开始执行 ===="
-          try {
-              pwsh -File "Users Public Documents/AstronomicalEvents.ps1"
-          } catch {
-              Write-Host "❌ 脚本执行失败: $_" -ForegroundColor Red
-          }
-          Write-Host "==== 执行结束，检查文件 ===="
-          if (Test-Path "Event Time Case") {
-              Get-ChildItem "Event Time Case" | Select-Object Name, Length | Format-Table
-          } else {
-              Write-Host "❌ 未找到 Event Time Case 文件夹！"
-          }
+          # 执行脚本
+          ./"Users Public Documents/AstronomicalEvents.ps1"
 
-      # 无论成功失败，强制生成一个状态文件，防止无内容提交被跳过
-      - name: Force Generate Status File
+      # 【关键修复】恢复被修改的 ps1 脚本，防止它被提交到仓库
+      - name: Revert Script Changes
         run: |
-          date -u > Event_Time_Case_Status.txt
-          if [ -f "SunMoonDataError.log" ]; then
-            echo "=== 发现错误日志 ===" >> Event_Time_Case_Status.txt
-            cat "SunMoonDataError.log" >> Event_Time_Case_Status.txt
-          fi
+          git checkout "Users Public Documents/AstronomicalEvents.ps1"
 
+      # 【关键修复】使用原生 Git 提交，只提交 txt 文件，忽略不存在的日志文件
       - name: Commit and Push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: auto-update data or log status"
-          file_pattern: 'Event Time Case/*.txt SunMoonDataError.log Event_Time_Case_Status.txt'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 只添加 Event Time Case 下的 txt 文件
+          git add "Event Time Case/*.txt"
+          
+          # 如果文件有变化就提交，没变化就静默跳过，防止报错
+          git commit -m "chore: auto-update sun & moon data" || echo "No changes to commit"
+          
+          # 推送到仓库
+          git push
