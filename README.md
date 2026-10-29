@@ -103,7 +103,7 @@ Rainmeter/Skins/Astronomy Suite/
 刷新 Rainmeter，在管理器中展开 Astronomy Suite，加载你想要的皮肤即可：
 
 > · Globe\Globe_Combine.ini （日月双球）
-> · SunMoonTracker\Trajectory Viewer.ini （轨迹视图）
+> <br>· SunMoonTracker\Trajectory Viewer.ini （轨迹视图）
 
 ---
 
