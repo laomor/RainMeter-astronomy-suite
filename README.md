@@ -104,6 +104,7 @@ Rainmeter/Skins/Astronomy Suite/
 
   · Globe\Globe_Combine.ini （日月双球）
   · SunMoonTracker\Trajectory Viewer.ini （轨迹视图）
+
 ---
 
 ## 核心原理（平台无关）
