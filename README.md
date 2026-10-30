@@ -120,81 +120,76 @@ Rainmeter/Skins/Astronomy Suite/
 
 ## 核心原理（平台无关）
 
-整个项目的数据流可以抽象为：**输入时间点 → 计算时间比例 → 映射到不同视图的坐标或图片**。
+整个项目的数据流可以抽象为：**输入时间点 → 计算时间比例 → 映射到不同视图的坐标或图片**。由于不同视图的展示需求不同，它们对时间的计算逻辑也有所差异。
 
-### 共用基础：时间比例 t
+### 共用基础：相邻事件对与时间比例 t
 
-无论展示哪种视图，第一步都是找出当前时间 `now` 处于哪两个相邻事件之间，并计算一个 0~2 之间的比例值 `t`。
+无论展示哪种视图，第一步都需要找到当前时间 `now` 处于哪两个**相邻事件**（`prevEvent` 与 `nextEvent`）之间。我们据此计算一个比例值 `t`。
 
-- **输入**：`(time, type)` 列表，type ∈ `Sunrise/Sunset/Moonrise/Moonset`，按时间升序。
-- **公式**：
+- **输入**：`(time, type)` 列表，按时间升序。
+- **计算公式**：
   ```text
-  ratio = (now - prev.time) / (next.time - prev.time)
-  if prev是升起 and next是落下:  t = ratio        // 可见期/白天 [0,1]
-  else:                          t = 1 + ratio    // 隐藏期/夜晚 [1,2]
+  ratio = (now - prevEvent.time) / (nextEvent.time - prevEvent.time)
+  
+  // 判断当前处于可见期还是隐藏期
+  if (prevEvent 是升起 AND nextEvent 是落下):  
+      t = ratio        // t ∈ [0, 1]
+  else:              
+      t = 1 + ratio    // t ∈ [1, 2]
   ```
-- `t = 0` 是升起瞬间，`t = 1` 是落下瞬间，`t = 2` 是次日升起。**后续所有视觉计算都基于这个 `t` 值。**
+
+**关于 t 的物理意义（消除歧义）：**
+`t` 的具体含义完全取决于你取到的是哪两个事件，它并**不固定**代表某一特定的方向：
+- 当 `prev` 是升起、`next` 是落下（即**可见期**），`t` 从 0 变到 1，代表天体从**升到落**。
+- 当 `prev` 是落下、`next` 是升起（即**隐藏期**），`t` 从 1 变到 2，代表天体从**落到升**。
+
+后续的 Globe 和 Tracker 的 Y 轴计算，均依赖这个统一的 `t` 值。
 
 ---
 
 ### 专属一：Globe 系列（地球光照球）
-Globe 系列只需要根据 `t` 算出一个 `0~359` 的**图片索引**，用来切换地球的贴图。
 
-**输入**：时间比例 `t`，本地经度 `lon`（东经正、西经负）。
+Globe 系列只关心图片索引，它直接利用上述的 `t` 值进行插值计算，得出 `0~359` 的图片编号。
 
-**图片索引计算公式**：
-```text
-// 1. 预计算日出/日落的锚点索引
-riseIdx = ((-lon - 90) % 360 + 360) % 360
-setIdx  = (( 90 - lon) % 360 + 360) % 360
+**核心逻辑**：
+- 当 `t ≤ 1`（可见期）时，在日出和日落的图片索引之间插值。
+- 当 `t > 1`（隐藏期）时，在日落和次日日出的图片索引之间插值。
 
-// 2. 根据 t 进行插值
-t ≤ 1:  idx = lerp360(riseIdx, setIdx, t)       // 白天：日出索引 → 日落索引
-t > 1:  idx = lerp360(setIdx, riseIdx, t - 1)   // 夜晚：日落索引 → 次日日出索引
-最终:   round(idx) % 360                        // 最终得到的图片编号
-
-// lerp360 处理循环边界：如果起点大于终点，给终点加 360 再插值
-lerp360(a, b, r) = a <= b ? a + (b - a) * r : a + (b + 360 - a) * r
-```
-
-> **验证**（`lon=114`）：`riseIdx=156`, `setIdx=336`。正午 `t=0.5` 时，`idx=246`，直射经度 `-246 mod 360 = 114`，刚好是本地经度。
+*(注：具体锚点索引公式见项目内的 `Globe.lua`，此处不作赘述。)*
 
 ---
 
 ### 专属二：SunMoonTracker 系列（轨迹/事件视图）
-SunMoonTracker 系列需要计算天体在屏幕上的 `(X, Y)` 坐标，两者的公式取决于你加载的皮肤。
 
-#### 1. Y 轴：抛物线模型
-天体在空中的高度用抛物线近似。根据 `t` 计算 Y 坐标：
+Tracker 系列需要计算天体在屏幕上的 `(X, Y)` 坐标。**注意：这里的 X 轴计算逻辑与 `t` 并不完全对等，不同皮肤有不同的处理方式。**
+
+#### 1. Y 轴：抛物线模型（依赖 t）
+天体在空中的高度用抛物线近似，根据 `t` 计算 Y 坐标：
 
 ```text
 可见期（t ∈ [0,1]）:  y = HorizonY - (HorizonY - apex)  * (1 - (2t - 1)²)
 隐藏期（t ∈ [1,2]）:  y = HorizonY + (nadir - HorizonY) * (1 - (2(t-1) - 1)²)
 ```
-- `t=0.5`（正午/午夜）时达到抛物线的顶点/底点。
-- `t=0` 或 `t=1`（升落瞬间）时，`y = HorizonY`，刚好在地平线上。
-- 太阳的 `apex` 会随白昼时长动态调整（夏季弧线高，冬季低）；月亮为简化模型，顶点固定。
 
-#### 2. X 轴：三种视图设计
-X 轴的计算逻辑取决于你想展示什么：
+- `t=0` 或 `t=1` 时，`y = HorizonY`，刚好在地平线上。
+- `t=0.5` 或 `t=1.5` 时，达到抛物线的顶点/底点。
+
+#### 2. X 轴：三种视图的不同设计
+正如你指出的，X 轴的计算并不完全依赖 `t`，特别是 `Position Simulator` 使用了跨越四个事件的完整周期。
 
 | 视图 | X 轴计算逻辑 |
 |---|---|
-| **Trajectory Viewer（日轨迹）** | `x = xStart + (now - todayStart) / secondPerPixel` <br>一天 24 小时固定铺满整个宽度。 |
-| **Event Tracker（事件追踪）** | 天体 X 固定在偏左位置。事件按 `(eventTime - axisStart) / secondPerPixel` 映射，形成滚动轴。 |
-| **Position Simulator（位置模拟）** | `x = xStart + (now - cycle.start) / (cycle.end - cycle.start) * length` <br>用“四事件周期”作为时间轴。 |
+| **Trajectory Viewer（日轨迹）** | 基于自然日计算：`x = xStart + (now - todayStart) / secondPerPixel` <br>一天 24 小时固定铺满整个宽度，与 `t` 无关。 |
+| **Event Tracker（事件追踪）** | 天体 X 固定在偏左位置。事件按 `(eventTime - axisStart) / secondPerPixel` 映射，形成滚动轴，与 `t` 无关。 |
+| **Position Simulator（位置模拟）** | 基于“四事件周期”计算 X 坐标。 |
 
-> **四事件周期**：取事件流中的 `[Set₁, Rise₁, Set₂, Rise₂]`，前两个事件的中点作起点，后两个事件的中点作终点。太阳和月亮各自用自己的周期，因此它们的 X 轴进度是不同步的。
-
----
-
-### 最终输出汇总
-
-| 视图/项目 | 输出的核心数据 | 用途 |
-|---|---|---|
-| **Globe** | 图片索引（0~359） | `ImageName=globe_246.png` |
-| **Tracker** | `(x, y)` 像素坐标 | 控制天体图标在容器内的位置 |
-| **通用** | 状态字符串、`HH:MM` | 显示 `Day/Night`、`Rise/Fall` 及事件时间 |
+> **什么是四事件周期？**
+> 在 `Position Simulator.lua` 中，为了表现天体运动的连贯性，它不只取前后两个事件，而是取完整的四个事件 `[Set₁, Rise₁, Set₂, Rise₂]`。
+> - `cycle.startTime` = 前两个事件的中点（即 Set₁ 和 Rise₁ 的中点）
+> - `cycle.endTime` = 后两个事件的中点（即 Set₂ 和 Rise₂ 的中点）
+> 
+> X 轴进度 `x = xStart + (now - cycle.startTime) / (cycle.endTime - cycle.startTime) * length`。
+> 在这种模式下，一个完整的 X 轴跨度**既包含了天体的隐藏期（Set₁ 到 Rise₁），也包含了可见期（Rise₁ 到 Set₂）**。太阳和月亮各自用自己的周期，因此它们的 X 轴进度是不同步的。
 
 ---
 
