@@ -143,8 +143,6 @@ Rainmeter/Skins/Astronomy Suite/
 - 当 `prev` 是升起、`next` 是落下（即**可见期**），`t` 从 0 变到 1，代表天体从**升到落**。
 - 当 `prev` 是落下、`next` 是升起（即**隐藏期**），`t` 从 1 变到 2，代表天体从**落到升**。
 
-后续的 Globe 和 Tracker 的 Y 轴计算，均依赖这个统一的 `t` 值。
-
 ---
 
 ### 专属一：Globe 系列（地球光照球）
@@ -161,10 +159,10 @@ Globe 系列只关心图片索引，它直接利用上述的 `t` 值进行插值
 
 ### 专属二：SunMoonTracker 系列（轨迹/事件视图）
 
-Tracker 系列需要计算天体在屏幕上的 `(X, Y)` 坐标。**注意：这里的 X 轴计算逻辑与 `t` 并不完全对等，不同皮肤有不同的处理方式。**
+Tracker 系列需要计算天体在屏幕上的 `(X, Y)` 坐标。**在这里，`t` 仅用于计算 Y 轴高度，不参与 X 轴的计算。** X 轴位置由各个视图独立的绝对时间逻辑决定。
 
 #### 1. Y 轴：抛物线模型（依赖 t）
-天体在空中的高度用抛物线近似，根据 `t` 计算 Y 坐标：
+天体在空中的高度用抛物线近似。代码通过判断 `t` 的范围来决定使用哪种抛物线（上开口或下开口），并计算具体高度：
 
 ```text
 可见期（t ∈ [0,1]）:  y = HorizonY - (HorizonY - apex)  * (1 - (2t - 1)²)
@@ -174,13 +172,13 @@ Tracker 系列需要计算天体在屏幕上的 `(X, Y)` 坐标。**注意：这
 - `t=0` 或 `t=1` 时，`y = HorizonY`，刚好在地平线上。
 - `t=0.5` 或 `t=1.5` 时，达到抛物线的顶点/底点。
 
-#### 2. X 轴：三种视图的不同设计
-正如你指出的，X 轴的计算并不完全依赖 `t`，特别是 `Position Simulator` 使用了跨越四个事件的完整周期。
+#### 2. X 轴：三种视图的独立设计
+X 轴的计算完全不依赖 `t`，而是由不同的时间轴逻辑驱动：
 
 | 视图 | X 轴计算逻辑 |
 |---|---|
-| **Trajectory Viewer（日轨迹）** | 基于自然日计算：`x = xStart + (now - todayStart) / secondPerPixel` <br>一天 24 小时固定铺满整个宽度，与 `t` 无关。 |
-| **Event Tracker（事件追踪）** | 天体 X 固定在偏左位置。事件按 `(eventTime - axisStart) / secondPerPixel` 映射，形成滚动轴，与 `t` 无关。 |
+| **Trajectory Viewer（日轨迹）** | 基于自然日计算：`x = xStart + (now - todayStart) / secondPerPixel` <br>一天 24 小时固定铺满整个宽度。 |
+| **Event Tracker（事件追踪）** | 天体 X 固定在偏左位置。事件按 `(eventTime - axisStart) / secondPerPixel` 映射，形成滚动轴。 |
 | **Position Simulator（位置模拟）** | 基于“四事件周期”计算 X 坐标。 |
 
 > **什么是四事件周期？**
