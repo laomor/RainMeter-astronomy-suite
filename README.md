@@ -1,7 +1,7 @@
 # Astronomy Suite
 
-> 把日月升降时间变成四种可视化视图：**地球光照球、天体轨迹、事件时间轴、视位置模拟**。
-> <br>`本 README 中仅展示地球光照球、视位置模拟两种预览效果。`
+> 把无聊的日月升降时间，变成眼前四种超酷的可视化视图：**地球光照球、天体轨迹、事件时间轴、视位置模拟**。
+> <br>`（注：这篇 README 里，我主要放了地球光照球和视位置模拟这两种效果图给大家瞧瞧。）`
 
 ---
 
@@ -14,7 +14,7 @@
     <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" width="200"><br><sub><b>2026-10-27_21-50</b></sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><sub><b>地球光照球</b> — 太阳/月亮双模式，360 张序列插值还原晨昏线</sub></td>
+    <td align="center" colspan="3"><sub><b>地球光照球</b> — 太阳和月亮双模式，用 360 张图平滑插值出真实的晨昏线</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" width="200"><br><sub><b>2026-10-28_09-00</b></sub></td>
@@ -22,54 +22,56 @@
     <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" width="200"><br><sub><b>2026-10-28_09-00</b></sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><sub><b>位置模拟</b> — 四事件周期内的天体视位置</sub></td>
+    <td align="center" colspan="3"><sub><b>位置模拟</b> — 看看天体在四个事件周期里到底在哪个位置</sub></td>
   </tr>
 </table>
 
-> 更多截图请查阅 `EffectPreviewImage_*/` 文件夹。
+> 想看更多截图？去 `EffectPreviewImage_*/` 文件夹里溜达一圈吧。
 
 ---
 
 ## 仓库结构
 
+下载完代码，你可能一脸懵。别急，这里是各个文件夹的“说明书”：
+
 ```text
 .
-├── AstronomicalEvents.xml          # Windows 任务计划配置文件
-├── GlobePicture.zip                # 360张地球图片压缩包（便于单独下载）
-├── Background/                     # 皮肤背景图
-├── icon/                           # 太阳、月亮及标记图标
-├── EffectPreviewImage_*/           # 效果预览图
-├── Event Time Case/                # 现成的示例数据（4个 txt 文件）
-├── GlobePicture/                   # 360张地球自旋图片序列 (globe_000 ~ 359)
-├── Script_Globe/                   # Globe 系列皮肤的 Lua 脚本
-├── Script_SunMoonTracker/          # Tracker 系列皮肤的 Lua 脚本
-├── Skins_Globe/                    # Globe 系列皮肤 (.ini)
-├── Skins_SunMoonTracker/           # Tracker 系列皮肤 (.ini)
-└── Users Public Documents/         # 数据采集端（PS1 脚本与 API 配置）
+├── AstronomicalEvents.xml          # Windows 的任务计划配置文件
+├── GlobePicture.zip                # 360张地球图片打包（嫌仓库大可以直接单下这个）
+├── Background/                     # 皮肤的背景图
+├── icon/                           # 太阳、月亮和那个小标记的图标
+├── EffectPreviewImage_*/           # 截图都在这儿
+├── Event Time Case/                # 懒人福音：现成的示例数据（4个 txt）
+├── GlobePicture/                   # 360张地球自旋图片 (globe_000 ~ 359)
+├── Script_Globe/                   # 地球光照球用的 Lua 脚本
+├── Script_SunMoonTracker/          # 轨迹视图用的 Lua 脚本
+├── Skins_Globe/                    # 地球光照球的皮肤配置 (.ini)
+├── Skins_SunMoonTracker/           # 轨迹视图的皮肤配置 (.ini)
+└── Users Public Documents/         # 数据采集端（抓数据的 PS1 脚本和 API 配置）
 ```
 
 ---
 
 ## 快速部署（Rainmeter）
 
-### 第一步：创建皮肤目录
-1. 右键系统托盘的 Rainmeter 图标，选择 **“皮肤” → “打开皮肤目录”**。
-2. 在打开的 `Skins` 文件夹中，新建名为 **`Astronomy Suite`** 的文件夹。
+### 第一步：建个新文件夹
+1. 在电脑右下角找到 Rainmeter 的小雨滴图标，右键它，选 **“皮肤” → “打开皮肤目录”**。
+2. 在弹出的 `Skins` 文件夹里，新建一个名叫 **`Astronomy Suite`** 的文件夹，这就是咱们的主阵地了。
 
-### 第二步：按结构组合文件
-从本仓库下载文件，严格按以下结构放入 `Astronomy Suite` 文件夹中。
-*(注：`@Resources` 为共享资源目录，所有 `.ini` 均从此处读取图片与脚本)*
+### 第二步：把文件对号入座
+从仓库下载文件后，按下面的结构老老实实摆放。
+*(小提示：`@Resources` 是个神奇的共享文件夹，所有的 `.ini` 皮肤都是去这里找图片和脚本的。)*
 
 ```text
 Rainmeter/Skins/Astronomy Suite/
 │
-├── @Resources/                     # 共享资源
-│   ├── globe/                      # 解压 GlobePicture.zip 至此
+├── @Resources/                     # 共享资源都放这
+│   ├── globe/                      # 把 GlobePicture.zip 解压到这里
 │   │   ├── globe_000.png
 │   │   └── ... (一直到 globe_359.png)
 │   │
-│   ├── Background_double.png       # 来自 Background/ 文件夹
-│   ├── Tracker_*.png               # 来自 icon/ 文件夹
+│   ├── Background_double.png       # 从 Background/ 里拿
+│   ├── Tracker_*.png               # 从 icon/ 里拿
 │   │
 │   ├── Globe.lua                   # 来自 Script_Globe/
 │   ├── Globe_Combine.lua           
@@ -90,32 +92,33 @@ Rainmeter/Skins/Astronomy Suite/
     └── Trajectory Viewer.ini
 ```
 
-### 第三步：准备天文数据
-数据文件需统一存放于 `C:\Users\Public\Documents\Rainmeter Data\`。请选择以下方案之一：
+### 第三步：搞点天文数据来
+皮肤其实就是个“空壳”，它得去 `C:\Users\Public\Documents\Rainmeter Data\` 读数据。你有两条路可以选：
 
-**方案 A：开箱即用（推荐用于效果测试）**
-下载仓库中 `Event Time Case` 文件夹内的 4 个 `.txt` 文件，复制到上述目录。
-> *注：该数据由 GitHub Actions 每日自动更新，默认基于北京经度。*
+**路子 A：只想看看效果（极速版）**
+直接从仓库的 `Event Time Case` 文件夹里，把那 4 个 `.txt` 文件掏出来，扔进上面的目录里。
+> *偷偷告诉你：这个文件夹里的数据是 GitHub Actions 每天自动更新的，不过默认用的是北京的经度哦。*
 
-**方案 B：本地自动化（推荐用于长期使用）**
-1. 将 `Users Public Documents` 中的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 复制到 `C:\Users\Public\Documents\`。
-2. 申请并填入 API 密钥（[和风天气](https://id.qweather.com/#/login) / [百度地图](https://lbsyun.baidu.com/apiconsole/becomedev/selection)）。
-3. 运行一次 `.ps1` 脚本确认无误，双击 `AstronomicalEvents.xml` 导入任务计划程序，实现每 4 小时自动拉取。
+**路子 B：我想自己长期用，看自己城市的（折腾版）**
+1. 把 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 挪到 `C:\Users\Public\Documents\`。
+2. 去这两个地方白嫖一下免费的 API 密钥：[和风天气](https://id.qweather.com/#/login) 和 [百度地图](https://lbsyun.baidu.com/apiconsole/becomedev/selection)。
+3. 把密钥填进 `WeatherApiKeys.json` 里保存好。
+4. 右键那个 `.ps1` 文件，选“使用 PowerShell 运行”，看它能不能吐出数据。如果没问题，双击 `AstronomicalEvents.xml` 导进系统的任务计划，以后每 4 小时它就会自己帮你抓数据啦。
 
-### 第四步：加载皮肤
-刷新 Rainmeter，展开 `Astronomy Suite`，加载所需皮肤：
-- `Globe\Globe_Combine.ini`（日月双球）
-- `SunMoonTracker\Trajectory Viewer.ini`（轨迹视图）
+### 第四步：开玩！
+刷新一下 Rainmeter，点开 `Astronomy Suite`，挑个顺眼的加载吧：
+- `Globe\Globe_Combine.ini`（想看日月双球的选这个）
+- `SunMoonTracker\Trajectory Viewer.ini`（想看运动轨迹的选这个）
 
 ---
 
 ## 核心原理与算法模型
 
-本项目将时间点转化为可视化坐标，核心依赖一个基础指标（时间比例 `t`）以及两个平行的视图分支。
+这玩意儿到底是怎么转起来的？其实它靠的是一个大杀器：**时间比例 `t`**，然后兵分两路去画图。
 
-### 基础：时间比例 `t` 与事件配对
+### 基础：算出一个时间比例 `t`
 
-无论渲染哪种视图，系统首先都需要匹配当前时间 `now` 左右相邻的两个事件（`prevEvent` 与 `nextEvent`），计算出一个用于插值的比例值 `t`：
+不管你想画什么，系统首先得知道“现在”是在哪两个事件（升起和落下）中间的。找到前后的 `prevEvent` 和 `nextEvent` 后，掏出这个公式：
 
 ```text
 ratio = (now - prevEvent.time) / (nextEvent.time - prevEvent.time)
@@ -125,58 +128,58 @@ if (prevEvent 是升起 AND nextEvent 是落下):
 else:              
     t = 1 + ratio    // 隐藏期，t ∈ [1, 2]
 ```
-> **物理意义**：`t` 的定义依赖于具体事件对。可见期时，`t` 从 0 变到 1 代表天体升到落；隐藏期时，`t` 从 1 变到 2 代表天体落到升。
+> **通俗点说**：`t` 就是个进度条。如果在白天（可见期），`t` 从 0 跑到 1，代表从升到落；如果在夜里（隐藏期），`t` 就从 1 跑到 2，代表从落到升。
 
 ---
 
-基于计算出的基础指标 `t`，不同皮肤系列走向了完全独立的计算分支：
+拿到这个进度条 `t` 之后，两个不同的皮肤系列就各奔东西了：
 
 #### 分支一：Globe 系列（地球光照球）
-该视图只需要利用 `t` 进行图片索引的映射。系统在预计算的日出/日落图片锚点之间进行插值，得出 `0~359` 的图片编号。
-- `t ≤ 1` 时，在日出和日落索引之间插值。
-- `t > 1` 时，在日落和次日日出索引之间插值。
-*(具体数学推导见 `Globe.lua`)*
+这哥们比较单纯，它只要图片序号。它就拿着 `t` 去日出和日落的图片序号中间找位置，插值出一个 `0~359` 的编号，直接往屏幕上贴。
+- 白天（`t ≤ 1`）就在日出和日落的图里找。
+- 夜里（`t > 1`）就在日落和第二天日出的图里找。
+*(想知道具体的数学魔法，去翻翻 `Globe.lua`)*
 
 #### 分支二：SunMoonTracker 系列（轨迹/事件视图）
-该视图需要计算天体在屏幕上的完整 `(X, Y)` 坐标。**其中 Y 轴依赖 `t`，X 轴则依赖绝对时间。**
+这就复杂点了，它得算出天体在屏幕上的 `(X, Y)` 坐标。**有意思的是，Y 轴高度靠 `t` 算，但 X 轴位置得看绝对时间。**
 
-**1. Y 轴：抛物线模型（依赖 t）**
-通过判断 `t` 的区间，决定使用上开口或下开口抛物线计算高度：
+**1. Y 轴：扔个抛物线（靠 t 算）**
+根据 `t` 的值，决定是用向上开口的抛物线还是向下开口的抛物线：
 ```text
 可见期（t ∈ [0,1]）:  y = HorizonY - (HorizonY - apex)  * (1 - (2t - 1)²)
 隐藏期（t ∈ [1,2]）:  y = HorizonY + (nadir - HorizonY) * (1 - (2(t-1) - 1)²)
 ```
-*(当 t=0 或 1 时，y 刚好在地平线；t=0.5 或 1.5 时达到顶点/底点)*
+*(你会发现，当 t=0 或 1 时，y 刚好就在地平线上；t=0.5 或 1.5 时，它正好挂在最高/最低点)*
 
-**2. X 轴：各视图独立的时间轴映射**
-X 轴的计算完全不依赖 `t`，而是由各个子视图的独立逻辑决定：
-| 视图 | X 轴映射逻辑 |
+**2. X 轴：各走各的阳关道（绝对时间算）**
+X 轴才不理会 `t` 呢，每个视图都有自己的小算盘：
+| 视图 | X 轴是怎么算的？ |
 |---|---|
-| **Trajectory Viewer** | `x = xStart + (now - todayStart) / secondPerPixel` (将 24 小时铺满宽度) |
-| **Event Tracker** | 天体固定，事件按 `(eventTime - axisStart) / secondPerPixel` 滚动 |
-| **Position Simulator** | 基于“四事件周期”比例计算 |
+| **Trajectory Viewer** | `x = xStart + (now - todayStart) / secondPerPixel` (简单粗暴，把一天 24 小时硬塞进屏幕宽度里) |
+| **Event Tracker** | 天体死盯屏幕左边不动，事件标记按 `(eventTime - axisStart) / secondPerPixel` 往后滚 |
+| **Position Simulator** | 这哥们特别，它用“四个事件”作为一个周期来算比例 |
 
-> **关于四事件周期**：在 `Position Simulator` 中，为保持轨迹连贯，采用 `[Set₁, Rise₁, Set₂, Rise₂]` 四个事件。以 `Set₁` 和 `Rise₁` 的中点为起点，`Set₂` 和 `Rise₂` 的中点为终点，计算当前时间在整个周期中的 X 轴进度。
+> **啥是四事件周期？** 在 `Position Simulator` 里，为了让轨迹看起来很顺滑，它不仅看前后的两个事件，而是把 `[Set₁, Rise₁, Set₂, Rise₂]` 这四个事件全拉过来。拿中间两个当起止点，算算现在时间在这个长周期里到底走了百分之几。
 
 ---
 
 ## 架构设计与进阶指南
 
-若计划将本项目逻辑移植至其他平台（如 Web、Android、原生桌面），请参考以下架构设计建议：
+如果你是个开发者，觉得这套逻辑挺好玩，想把它搬到 Web、手机 App 或者别的桌面上，下面这几条老司机的建议，你可以看看：
 
-### 1. 数据源与 API 策略
-- **API 依赖**：目前市面鲜有免费提供高精度月升月落数据的 API，和风天气是极佳的选择。
-- **密钥隔离**：建议在移植应用中开放配置接口，引导用户填入个人 API Key，以避免公共密钥触及调用频率限制或产生计费。
+### 1. 关于 API 和密钥
+- **找谁要数据？** 讲真，现在能免费、稳定给你月升月落数据的 API 真不多，和风天气算是良心之选了。
+- **密钥得用户自己出**：如果是给别人用的 App，千万别把开发者自己的 Key 塞在代码里，万一被刷爆了就等着扣费吧。给用户留个设置接口，让他们填自己的 Key。
 
-### 2. 渲染方案的降维与升维
-- **静态图片方案（当前降维）**：当前项目基于赤道视角生成了 360 张图片。若需适配不同纬度，靠静态图片会导致晨昏线倾角失真。
-- **3D 实时渲染（升维替代）**：推荐抛弃静态图，改用 Three.js 或原生 3D 引擎。仅需一张地球贴图，通过 Shader 结合太阳直射经纬度算法，即可实时演算出任意视角下精准的晨昏线状态。
+### 2. 渲染：从 2D 降维到 3D 升维
+- **现在的土办法（降维）**：我们是趴在赤道上，渲染了 360 张图。要是用户跑到北纬 30 度去用，那晨昏线的歪斜角度就不对了。
+- **高级玩法（升维）**：换到 Web 或 App 上，直接用 Three.js 或者原生的 3D 引擎，搞一张地球皮贴上去，用 Shader 结合太阳直射的经纬度算一算，不管什么纬度，晨昏线都给你算得明明白白的。
 
-### 3. 轨迹算法的可替换性
-- **抛物线拟合的妥协**：当前的 `1 - (2t-1)²` 抛物线模型，主要是受限于 Rainmeter 的曲线绘制能力（无法平滑渲染真实曲线，退而求其次采用抛物线拟合）。
-- **替代方案**：在 Web 或原生端，完全可以使用 SVG、Canvas 或 `UIBezierPath`，直接通过正弦函数（`sin`）或天文学球面三角公式绘制真实的平滑天体轨迹。
+### 3. 画曲线，别死磕抛物线
+- **为了妥协才用抛物线**：咱们现在用的 `1 - (2t-1)²`，纯粹是因为 Rainmeter 画不出平滑的曲线，没办法才退而求其次用抛物线凑合的。
+- **换个好用的工具**：你要是用 Web，拿个 SVG、Canvas，或者直接画贝塞尔曲线、正弦函数，甚至套个天文学球面三角公式，画出来的天体轨迹绝对比现在顺滑得多。
 
-### 4. 异常事件处理机制（重要）
-- **月亮事件的周期性缺失**：月球公转周期约 24 小时 50 分钟。这种天文现象会导致在特定日期内，某天只有“月出”或只有“月落”。
-- **生成端（PS1）的剪枝策略**：本项目在生成端即解决了该问题。遇到 API 返回空值时，脚本将其标记为 `nullMoonset` 等占位符，然后利用**时间排序**将非数字字符串排至文件末尾，最后通过**首尾裁剪机制**直接剔除，确保前端拿到的数据必然严格遵循“一升一降”成对出现。
-- **解析端（Lua）的防御设计**：由于生成端保证了数据纯净，前端计算无需针对“落至落”做复杂兜底。仅需在解析时进行基础的 `tonumber` 检查（防篡改历史脏数据），过滤无效行即可。
+### 4. 别被月亮“坑”了（异常处理）
+- **月亮偶尔会旷工**：月亮的公转周期比 24 小时长了那么一点点（大概 24小时50分钟）。所以总有那么几天，它一天只能升上来或者落下去一次。
+- **我们在后台把它擦了屁股**：为了让前端不崩溃，我们在 PS1 脚本生成数据时，就把空的数据打个 `nullMoonset` 的标记，然后用**时间排序**把这种垃圾数据踢到最后一行，直接切掉。这样交给 Lua 的数据，绝对是干干净净、成双成对的“一升一落”。
+- **前端留个心眼就行**：既然后端数据是干净的，前端就不用费劲去写复杂的容错代码了。稍微做一个简单的 `tonumber` 判断，防止别人手动改坏了文件就行。
