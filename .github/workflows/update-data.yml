@@ -32,6 +32,8 @@ jobs:
 
       - name: Run Astronomical Events Script
         shell: pwsh
+        env:
+          TZ: Asia/Shanghai   # <--- 这里是新增的时区设置
         run: |
           # 执行脚本
           ./"Users Public Documents/AstronomicalEvents.ps1"
