@@ -11,6 +11,31 @@
 
 ---
 
+## 效果预览
+
+<table align="center">
+  <tr>
+    <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" width="200"><br><sub><b>2026-10-27_21-50</b></sub></td>
+    <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-30_11-23.png" width="200"><br><sub><b>2026-10-30_11-23</b></sub></td>
+    <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" width="200"><br><sub><b>2026-10-27_21-50</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><sub><b>地球光照球</b> — 太阳和月亮双模式，用 360 张图平滑插值出真实的太阳直射经度图片</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" width="200"><br><sub><b>2026-10-28_09-00</b></sub></td>
+    <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" width="200"><br><sub><b>2026-10-30_22-35</b></sub></td>
+    <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" width="200"><br><sub><b>2026-10-28_09-00</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="3"><sub><b>位置模拟</b> — 看看天体在天空中在哪个位置</sub></td>
+  </tr>
+</table>
+
+> 想看更多截图？去 `EffectPreviewImage_*/` 文件夹里溜达一圈吧。
+
+---
+
 ## 这个项目到底在干嘛？
 
 先别急着看代码，咱们把整条链路捋一遍。这个项目其实分成 **“采数据”** 和 **“画皮肤”** 两段：
@@ -39,35 +64,7 @@ Rainmeter 皮肤（Lua + INI）
         ▼
 你屏幕上看到的地球球、轨迹、事件条、位置模拟
 ```
-一句话总结：
-PS1 负责把网上的日月升降时间抓下来，
-Lua 负责把这些时间翻译成“现在该显示第几张图 / 天体在哪个坐标”，
-INI 负责把图和字摆到屏幕上。
-
----
-
-## 效果预览
-
-<table align="center">
-  <tr>
-    <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" width="200"><br><sub><b>2026-10-27_21-50</b></sub></td>
-    <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-30_11-23.png" width="200"><br><sub><b>2026-10-30_11-23</b></sub></td>
-    <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" width="200"><br><sub><b>2026-10-27_21-50</b></sub></td>
-  </tr>
-  <tr>
-    <td align="center" colspan="3"><sub><b>地球光照球</b> — 太阳和月亮双模式，用 360 张图平滑插值出真实的太阳直射经度图片</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" width="200"><br><sub><b>2026-10-28_09-00</b></sub></td>
-    <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" width="200"><br><sub><b>2026-10-30_22-35</b></sub></td>
-    <td align="center"><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" width="200"><br><sub><b>2026-10-28_09-00</b></sub></td>
-  </tr>
-  <tr>
-    <td align="center" colspan="3"><sub><b>位置模拟</b> — 看看天体在天空中在哪个位置</sub></td>
-  </tr>
-</table>
-
-> 想看更多截图？去 `EffectPreviewImage_*/` 文件夹里溜达一圈吧。
+一句话总结：**PS1 负责把网上的日月升降时间抓下来，Lua 负责把这些时间翻译成“现在该显示第几张图 / 天体在哪个坐标”，INI 负责把图和字摆到屏幕上。**
 
 ---
 
