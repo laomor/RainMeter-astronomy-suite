@@ -2,7 +2,7 @@ name: Update Sun & Moon Data
 
 on:
   schedule:
-    - cron: '0 0 * * *' 
+    - cron: '02 1 * * *' 
   workflow_dispatch:
 
 jobs:
