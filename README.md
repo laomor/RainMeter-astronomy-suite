@@ -151,6 +151,7 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
 - **Trajectory Viewer（每日轨迹）**：`x = XAxisStart + (now - 今日零点) / SecondPerPixel`。把一天铺满时间轴，从左走到右，每天零点重置。
 - **Event Tracker（未来事件）**：计算出一个时间窗口，当前时间固定在偏左的位置，事件按 `(eventTime - axisStart) / SecondPerPixel` 往后排。最多显示 5 个事件。
 - **Position Simulator（天空位置）**：找当前“四事件周期”（`Set₁ → Rise₁ → Set₂ → Rise₃`），把当前时间在这个周期里的比例，映射到整条时间轴上。
+  > **注**：为什么这里非得找四个事件？因为如果只看两个事件，系统分不清当前到底是在“夜晚的上升期/下降期”，还是“白天的上升期/下降期”。只有把周期拼完整，确认了当前所处的具体阶段，才能定好坐标轴真正的起始位置。
 
 ---
 
