@@ -132,7 +132,7 @@ Rainmeter 皮肤（Lua + INI）
 
 ## 快速部署（Rainmeter）
 
-### 第一步：建个新文件夹
+### 第一步：建个皮肤文件夹
 1. 在电脑右下角找到 Rainmeter 的小雨滴图标，右键它，选 **“皮肤” → “打开皮肤目录”**。
 2. 在弹出的 `Skins` 文件夹里，新建一个名叫 **`Astronomy Suite`** 的文件夹，这就是咱们的主阵地了。
 
@@ -178,10 +178,11 @@ Rainmeter/Skins/Astronomy Suite/
 > *偷偷告诉你：这个文件夹里的数据是 GitHub Actions 每天自动更新的，不过默认用的是北京的经度哦。*
 
 **路子 B：我想自己长期用，看自己城市的（折腾版）**
-1. 把 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 挪到 `C:\Users\Public\Documents\`。
+1. 把 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 挪到 `C:\Users\Public\Documents\`。注意：这俩要放一起，脚本会在它自己所在目录找配置文件。
 2. 去这两个地方白嫖一下免费的 API 密钥：[和风天气](https://id.qweather.com/#/login) 和 [百度地图](https://lbsyun.baidu.com/apiconsole/becomedev/selection)。
 3. 把密钥填进 `WeatherApiKeys.json` 里保存好。
 4. 右键那个 `.ps1` 文件，选“使用 PowerShell 运行”，看它能不能吐出数据。如果没问题，双击 `AstronomicalEvents.xml` 导进系统的任务计划，以后每 4 小时它就会自己帮你抓数据啦。
+   *(小提示：这里用 SYSTEM 账户运行，主要是为了保证不管电脑当前是谁登录（或者没登录），任务都能顺利启动起来，准时去拿数据。)*
 
 ### 第四步：开玩！
 刷新一下 Rainmeter，点开 `Astronomy Suite`，挑个顺眼的加载吧：
