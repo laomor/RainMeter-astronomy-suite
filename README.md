@@ -12,7 +12,7 @@
 
 ## 效果预览
 
-<table align="center">
+<table>
   <tr>
     <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" width="200"><br><sub><b>2026-10-27_21-50</b></sub></td>
     <td align="center"><img src="EffectPreviewImage_Globe/Globe_2026-10-30_11-23.png" width="200"><br><sub><b>2026-10-30_11-23</b></sub></td>
@@ -134,7 +134,7 @@ else:
 
 > **晨昏线的作用是啥？** 360 张图里，晨线和昏线对应的两张图就是“本地日出”和“本地日落”的边界。它们就像一个分拣员，把图分成了白天区间和夜晚区间。**我们不是真把两张图删了，而是把它们当成边界锚点。**
 
-*(注：月亮球借用了同一套纹理和公式，只是用月出月落来驱动。它显示的是“视觉进度”，不是真实的月亮直射经纬度，纯为了好看。)*
+*(注：月亮球借用了同一套纹理和公式，只是用月出月落来驱动。)*
 
 ### 分支二：SunMoonTracker 系列（三个视图）
 
