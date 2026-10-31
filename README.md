@@ -35,6 +35,28 @@
 
 ---
 
+## 仓库结构
+
+下载完代码，你可能一脸懵。别急，这里是各个文件夹的“说明书”：
+
+```text
+.
+├── AstronomicalEvents.xml          # Windows 的任务计划配置文件
+├── GlobePicture.zip                # 360张地球图片打包（嫌仓库大可以直接单下这个）
+├── Background/                     # 皮肤的背景图
+├── icon/                           # 太阳、月亮和那个小标记的图标
+├── EffectPreviewImage_*/           # 截图都在这儿
+├── Event Time Case/                # 懒人福音：现成的示例数据（4个 txt）
+├── GlobePicture/                   # 360张地球自旋图片 (globe_000 ~ 359)
+├── Script_Globe/                   # 地球光照球用的 Lua 脚本
+├── Script_SunMoonTracker/          # 轨迹视图用的 Lua 脚本
+├── Skins_Globe/                    # 地球光照球的皮肤配置 (.ini)
+├── Skins_SunMoonTracker/           # 轨迹视图的皮肤配置 (.ini)
+└── Users Public Documents/         # 数据采集端（抓数据的 PS1 脚本和 API 配置）
+```
+
+---
+
 ## 这个项目到底在干嘛？
 
 先别急着看代码，咱们把整条链路捋一遍。这个项目其实分成 **“采数据”** 和 **“画皮肤”** 两段：
@@ -105,28 +127,6 @@ Rainmeter 皮肤（Lua + INI）
 - **输出**：太阳/月亮固定在时间轴偏左的位置，事件标记按时间在时间轴上滚动。
 - **时间窗口**：以当前时间为中心，往前一段、往后一段（默认总共 48 小时）。
 - **注意**：事件标记最多 5 个（当前时间之前最近 1 个，之后最近 4 个）；超出窗口的事件会落到容器外，被裁掉。
-
----
-
-## 仓库结构
-
-下载完代码，你可能一脸懵。别急，这里是各个文件夹的“说明书”：
-
-```text
-.
-├── AstronomicalEvents.xml          # Windows 的任务计划配置文件
-├── GlobePicture.zip                # 360张地球图片打包（嫌仓库大可以直接单下这个）
-├── Background/                     # 皮肤的背景图
-├── icon/                           # 太阳、月亮和那个小标记的图标
-├── EffectPreviewImage_*/           # 截图都在这儿
-├── Event Time Case/                # 懒人福音：现成的示例数据（4个 txt）
-├── GlobePicture/                   # 360张地球自旋图片 (globe_000 ~ 359)
-├── Script_Globe/                   # 地球光照球用的 Lua 脚本
-├── Script_SunMoonTracker/          # 轨迹视图用的 Lua 脚本
-├── Skins_Globe/                    # 地球光照球的皮肤配置 (.ini)
-├── Skins_SunMoonTracker/           # 轨迹视图的皮肤配置 (.ini)
-└── Users Public Documents/         # 数据采集端（抓数据的 PS1 脚本和 API 配置）
-```
 
 ---
 
