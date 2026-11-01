@@ -63,8 +63,8 @@ PowerShell 采集脚本（AstronomicalEvents.ps1）
         │
         ├─ 前两个是给人看的：yyyyMMddHHmm + 事件名
         └─ 后两个是给机器算的：Unix 时间戳 + 事件名
-<br>
-<br>
+
+
         │
         ▼
 Rainmeter 皮肤（Lua 算数 + INI 贴图）
