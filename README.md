@@ -16,7 +16,7 @@
   <tr>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" ><br><sub><b>2026-10-27_21-50</b></sub></td>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-10-30_11-23.png" ><br><sub><b>2026-10-30_11-23</b></sub></td>
-    <td><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" ><br><sub><b>2026-10-27_21-50</b></sub></td>
+    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-01_12-04.png" ><br><sub><b>2026-11-01_12-04</b></sub></td>
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-11-01_12-04.png" ><br><sub><b>2026-11-01_12-04</b></sub></td>
@@ -28,13 +28,13 @@
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" ><br><sub><b>2026-10-28_09-00</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" ><br><sub><b>2026-10-28_09-00</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" ><br><sub><b>2026-10-28_09-00</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30_22-35</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30_22-35</b></sub></td>
   </tr>
   <tr>
-    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30_22-35</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30_22-35</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30_22-35</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-47.png" ><br><sub><b>2026-11-03_06-47</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-47.png" ><br><sub><b>2026-11-03_06-47</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-11-03_06-47</b></sub></td>
   </tr>
   <tr>
     <td colspan="3"><sub><b>位置模拟</b> — 看看天体在天空中在哪个位置</sub></td>
