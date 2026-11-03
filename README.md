@@ -45,13 +45,6 @@
 
 ---
 
-<table width="100%">
-  <tr>
-    <td align="left"><h2>这四个视图到底能看啥？</h2></td>
-    <td align="right"><a href="#astronomy-suite" style="text-decoration: none;">⬆️ 回顶部</a></td>
-  </tr>
-</table>
-
 ## 这四个视图到底能看啥？
 
 | 视图 | 一句话说清楚 | 能解决你啥好奇 |
