@@ -72,15 +72,20 @@
 
 ```text
 Windows 任务计划（AstronomicalEvents.xml）
-        │  每 4 小时自动跑一次，开机也会补跑
+        │  每 4 小时触发一次，开机后也会补跑
         ▼
 PowerShell 采集脚本（AstronomicalEvents.ps1）
-        │  拿着 API 密钥去和风天气、百度地图要数据
+        │  读 WeatherApiKeys.json
+        │  查公网 IP → 百度定位 → 和风天气城市编码
+        │  拉日月升降数据
         ▼
-4 个文本文件（存在 C:\Users\Public\Documents\Rainmeter Data\）
+4 个文本文件（放在 C:\Users\Public\Documents\Rainmeter Data\）
         │
-        ├─ 前两个是给人看的：yyyyMMddHHmm + 事件名
-        └─ 后两个是给机器算的：Unix 时间戳 + 事件名
+        ├─ SunEvents.txt / MoonEvents.txt
+        │     给人看的本地时间格式：yyyyMMddHHmm + 事件名
+        │
+        └─ SunTimeStampEvent.txt / MoonTimeStampEvent.txt
+             给 Lua 算的 Unix 时间戳格式：10 位时间戳 + 事件名
 
 
         │
@@ -99,8 +104,8 @@ Rainmeter 皮肤（Lua 算数 + INI 贴图）
 ## <a href="#astronomy-suite">⇑</a>快速部署（保姆级教程）
 
 ### 第一步：建个文件夹
-1. 右下角找到 Rainmeter 的雨滴图标，右键 → **“皮肤” → “打开皮肤目录”**。
-2. 在 `Skins` 文件夹里，新建个名叫 **`Astronomy Suite`** 的文件夹。
+1. 在电脑右下角找到 Rainmeter 的小雨滴图标，右键它，选 **“皮肤” → “打开皮肤目录”**。
+2. 在弹出的 `Skins` 文件夹里，新建一个名叫 **`Astronomy Suite`** 的文件夹。
 
 ### 第二步：把文件对号入座
 从仓库下载文件，按这个结构塞进去。*(注意：`@Resources` 是个公共资源库，所有皮肤都会去这里找图片和脚本)*
