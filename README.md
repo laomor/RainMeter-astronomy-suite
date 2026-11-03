@@ -45,7 +45,7 @@
 
 ---
 
-## 这四个视图到底能看啥？<a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>
+## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>这四个视图到底能看啥？
 
 | 视图 | 一句话说清楚 | 能解决你啥好奇 |
 |---|---|---|
@@ -58,7 +58,7 @@
 
 ---
 
-## 部署前，先看懂这玩意儿是怎么跑起来的？
+## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>部署前，先看懂这玩意儿是怎么跑起来的？
 
 其实整个项目就分两步：**去网上“进货”（采数据）**，然后**把货摆上货架（画皮肤）**。
 
@@ -88,7 +88,7 @@ Rainmeter 皮肤（Lua 算数 + INI 贴图）
 
 ---
 
-## 快速部署（保姆级教程）
+## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>快速部署（保姆级教程）
 
 ### 第一步：建个文件夹
 1. 右下角找到 Rainmeter 的雨滴图标，右键 → **“皮肤” → “打开皮肤目录”**。
@@ -132,7 +132,7 @@ Rainmeter/Skins/Astronomy Suite/
 
 ---
 
-## 核心原理与算法模型
+## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>核心原理与算法模型
 
 这玩意到底怎么转的？其实全靠一个大杀器：**时间比例 `t`**，然后兵分两路去画图。
 
@@ -182,7 +182,7 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
 
 ---
 
-## 移植避坑指南（过来人的血泪）
+## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>移植避坑指南（过来人的血泪）
 
 如果大佬想把这套逻辑搬到 Web 或者 App 里，这几条建议一定要看：
 
@@ -241,7 +241,7 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
 
 ---
 
-## 最后
+## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>最后
 
 这就是个喜欢折腾桌面的人，拿 Rainmeter 和 Lua 拼出来的小玩具。里面有不少“当时能跑就行”的妥协，也有不少数学公式是我现学的。
 
