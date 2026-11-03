@@ -20,7 +20,7 @@
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
-    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
+    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_16-14.png" ><br><sub><b>2026-11-03  16:14</b></sub></td>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
   </tr>
   <tr>
@@ -33,7 +33,7 @@
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_16-14.png" ><br><sub><b>2026-11-03  16:14</b></sub></td>
     <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
   </tr>
   <tr>
@@ -44,7 +44,7 @@
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
-    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
+    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_16-14.png" ><br><sub><b>2026-11-03  16:14</b></sub></td>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
   </tr>
 </table>
