@@ -14,9 +14,9 @@
 
 <table>
   <tr>
+    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-01_12-04.png" ><br><sub><b>2026-11-01  12:04</b></sub></td>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-10-27_21-50.png" ><br><sub><b>2026-10-27  21:50</b></sub></td>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-10-30_11-23.png" ><br><sub><b>2026-10-30  11:23</b></sub></td>
-    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-01_12-04.png" ><br><sub><b>2026-11-01  12:04</b></sub></td>
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
