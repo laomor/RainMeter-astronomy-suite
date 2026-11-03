@@ -241,7 +241,7 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
 
 ---
 
-## <a href="#astronomy-suite" style="text-decoration: none;">⬆️</a>最后
+## <a href="#astronomy-suite" style="text-decoration: none;">⇑</a>最后
 
 这就是个喜欢折腾桌面的人，拿 Rainmeter 和 Lua 拼出来的小玩具。里面有不少“当时能跑就行”的妥协，也有不少数学公式是我现学的。
 
