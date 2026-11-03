@@ -134,7 +134,7 @@ Rainmeter/Skins/Astronomy Suite/
 直接去仓库的 `Event Time Case` 文件夹，把里面的 4 个 `.txt` 扔进上面的目录里。（里面默认是北京的数据，够你跑起来看了）。
 
 **路子 B：想长期自己用（折腾版）**
-1. 把 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 放到 `C:\Users\Public\Documents\`（这俩必须在一块）。
+1. 把 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 放到 `C:\Users\Public\Documents\`（这俩必须在一块，脚本会在它自己所在目录找配置文件）。
 2. 去 [和风天气](https://id.qweather.com/#/login) 和 [百度地图](https://lbsyun.baidu.com/apiconsole/becomedev/selection) 白嫖两个免费 API Key 填进 `WeatherApiKeys.json` 文件里。
 3. 右键 `.ps1` 文件选“使用 PowerShell 运行”，看它能不能吐出数据。
 4. 没问题的话，把 `AstronomicalEvents.xml` 导入系统的任务计划程序。以后每 4 小时它就会自动去进货。
