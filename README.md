@@ -40,9 +40,13 @@
     <td colspan="3"><sub><b>位置模拟</b> — 看看天体在天空中在哪个位置</sub></td>
   </tr>
   <tr>
-    <td><img src="EffectPreviewImage_Clock/Clock Min_2026-11-03_06-48.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
-    <td><img src="EffectPreviewImage_Clock/Clock Min_2026-11-03_06-48.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
-    <td><img src="EffectPreviewImage_Clock/Clock Min_2026-11-03_06-48.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
+    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
+  </tr>
+  <tr>
+    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
+  </tr>
+  <tr>
+    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
   </tr>
 </table>
 
