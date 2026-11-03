@@ -41,8 +41,6 @@
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
-  </tr>
-  <tr>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
   </tr>
   <tr>
