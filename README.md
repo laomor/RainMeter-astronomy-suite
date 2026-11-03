@@ -44,6 +44,9 @@
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03_06-46</b></sub></td>
   </tr>
+  <tr>
+    <td><img src="EffectPreviewImage_Clock/Clock Min_2026-11-03_06-48.png" ><br><sub><b>2026-11-03_06-48</b></sub></td>
+  </tr>
 </table>
 
 > 这里只放了几张图给你尝尝鲜，想看更多？去 `EffectPreviewImage_*/` 文件夹里自己翻吧。
