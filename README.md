@@ -3,7 +3,7 @@
 > 我把平时自己折腾的日月升降数据，拿来在 Rainmeter 里做了四个小视图：**地球光照球、每日轨迹、天空位置模拟、事件时间轴**。
 > 
 > 写这篇说明主要想干两件事：
-> - **如果你只想用**：直接抄“[快速部署](#快速部署保姆级教程)”那一节，几分钟就能在桌面上看到效果。
+> - **如果你只想用**：直接抄“[快速部署](#快速部署不管你是想直接用还是想看下效果都应该看一下)”那一节，几分钟就能在桌面上看到效果。
 > - **如果你想搬家（移植）**：我把这四个视图[到底怎么算](#核心原理与算法模型) 的、[数据怎么流](#部署前先看懂这玩意儿是怎么跑起来的) 的、[公式长啥样](#核心原理与算法模型)、还有我[当时踩过的坑](#移植避坑指南过来人的血泪)全写在下面了。你搬到 Web、手机 App 、小部件、小组件里直接拿去用就行。
 > 
 > 先交个底：我不是专业程序员。这项目就是我边查资料、边试错、边改代码一点点抠出来的。里面有很多“当时能跑就行”的妥协，大佬轻喷 *（主打一个真诚）*。这个玩意儿能跑、能看、能让我自己觉得好玩，我就知足了。
@@ -101,7 +101,7 @@ Rainmeter 皮肤（Lua 算数 + INI 贴图）
 
 ---
 
-## <a href="#astronomy-suite">⇑</a>快速部署（保姆级教程）
+## <a href="#astronomy-suite">⇑</a>快速部署（不管你是想直接用，还是想看下效果，都应该看一下）
 
 ### 第一步：建个文件夹
 1. 在电脑右下角找到 Rainmeter 的小雨滴图标，右键它，选 **“皮肤” → “打开皮肤目录”**。
@@ -135,7 +135,7 @@ Rainmeter/Skins/Astronomy Suite/
 
 **路子 B：想长期自己用（折腾版）**
 1. 把 `Users Public Documents` 里的 `AstronomicalEvents.ps1` 和 `WeatherApiKeys.json` 放到 `C:\Users\Public\Documents\`（这俩必须在一块）。
-2. 去 [和风天气](https://id.qweather.com/#/login) 和 [百度地图](https://lbsyun.baidu.com/apiconsole/becomedev/selection) 白嫖两个免费 API Key 填进去。
+2. 去 [和风天气](https://id.qweather.com/#/login) 和 [百度地图](https://lbsyun.baidu.com/apiconsole/becomedev/selection) 白嫖两个免费 API Key 填进 `WeatherApiKeys.json` 文件里。
 3. 右键 `.ps1` 文件选“使用 PowerShell 运行”，看它能不能吐出数据。
 4. 没问题的话，把 `AstronomicalEvents.xml` 导入系统的任务计划程序。以后每 4 小时它就会自动去进货。
    <br>*(用 SYSTEM 账户跑，就是为了不管电脑当前谁登录、甚至锁屏了，它都能准点干活)*。
