@@ -39,6 +39,11 @@
   <tr>
     <td colspan="3"><sub><b>位置模拟</b> — 看看天体在天空中在哪个位置</sub></td>
   </tr>
+  <tr>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-47.png" ><br><sub><b>2026-11-03_06-47</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-47.png" ><br><sub><b>2026-11-03_06-47</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-47.png" ><br><sub><b>2026-11-03_06-47</b></sub></td>
+  </tr>
 </table>
 
 > 这里只放了几张图给你尝尝鲜，想看更多？去 `EffectPreviewImage_*/` 文件夹里自己翻吧。
