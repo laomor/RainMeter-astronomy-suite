@@ -28,7 +28,7 @@
   </tr>
   <tr>
     <td><img src="EffectPreviewImage_Position/Position_2026-10-28_09-00.png" ><br><sub><b>2026-10-28  09:00</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30  22:35</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-11_09-00.png" ><br><sub><b>2026-11-11  09:00</b></sub></td>
     <td><img src="EffectPreviewImage_Position/Position_2026-10-30_22-35.png" ><br><sub><b>2026-10-30  22:35</b></sub></td>
   </tr>
   <tr>
