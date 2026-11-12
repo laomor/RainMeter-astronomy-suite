@@ -21,7 +21,7 @@
   <tr>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
     <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_16-14.png" ><br><sub><b>2026-11-03  16:14</b></sub></td>
-    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
+    <td><img src="EffectPreviewImage_Globe/Globe_2026-11-12_16-14.png" ><br><sub><b>2026-11-12  16:14</b></sub></td>
   </tr>
   <tr>
     <td colspan="3"><sub><b>地球光照球</b> — 太阳和月亮双模式，用 360 张图平滑插值出真实的太阳直射经度图片</sub></td>
@@ -34,7 +34,7 @@
   <tr>
     <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
     <td><img src="EffectPreviewImage_Position/Position_2026-11-03_16-14.png" ><br><sub><b>2026-11-03  16:14</b></sub></td>
-    <td><img src="EffectPreviewImage_Position/Position_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
+    <td><img src="EffectPreviewImage_Position/Position_2026-11-12_16-14.png" ><br><sub><b>2026-11-12  16:14</b></sub></td>
   </tr>
   <tr>
     <td colspan="3"><sub><b>位置模拟</b> — 看看天体在天空中在哪个位置</sub></td>
@@ -45,7 +45,7 @@
   <tr>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
     <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_16-14.png" ><br><sub><b>2026-11-03  16:14</b></sub></td>
-    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-03_06-46.png" ><br><sub><b>2026-11-03  06:46</b></sub></td>
+    <td><img src="EffectPreviewImage_Clock/Clock Max_2026-11-12_16-14.png" ><br><sub><b>2026-11-12  16:14</b></sub></td>
   </tr>
 </table>
 
