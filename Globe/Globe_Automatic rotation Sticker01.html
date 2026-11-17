@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<!-- ============================================================ -->
+<!-- Globe_自动旋转版_政区国界贴图.html - Three.js 带贴图的地球 + 自转 + 地轴绕行（贴图为政区国界图，经纬网由贴图自带） -->
+<!-- 自转与地轴绕行各按自己的周期同时进行，不需要输入参数 -->
+<!-- 三件套交付：本页 + 同目录的 three.min.js（库）+ map.jpg（贴图），三个文件放在一起发布 -->
+<!-- ============================================================ -->
+
+<html lang="zh-CN">   <!-- 根节点；lang=zh-CN 声明页面语言为简体中文 -->
+<head>                <!-- 头部：放页面配置与样式 -->
+  <meta charset="UTF-8">   <!-- 声明 UTF-8 编码，防止中文乱码 -->
+  <title>Three.js｜贴图地球 · 自转与地轴绕行</title>   <!-- 浏览器标签页标题 -->
+  <link rel="icon" href="data:,">   <!-- 空白图标：免去浏览器自动索要 favicon.ico 的那次请求 -->
+
+<style>
+  /* 整体重置：清掉浏览器默认外边距，画面顶到窗口边缘 */
+  html,body {
+    margin:0;              /* 去掉默认 8px 外边距 */
+    background:#05070d;    /* 近黑的深空底色 */
+    overflow:hidden;       /* 禁止滚动条 */
+  }
+  canvas {
+    display:block;         /* 块级显示，消除行内元素底部的空白缝隙 */
+  }
+  /* 左上角控制面板：三个图层开关、仰角滑块与周期读数 */
+  #panel {
+    position:fixed;        /* 固定定位，不随内容滚动 */
+    top:12px;              /* 距顶部 12 像素 */
+    left:12px;             /* 距左侧 12 像素 */
+    z-index:999;           /* 层级压过画布 */
+    background:rgba(0,0,0,0);  /* 半透明黑底 */
+    padding:10px;          /* 内边距 */
+    border-radius:6px;     /* 圆角 */
+  }
+  #panel button {
+    display:block;         /* 每个按钮独占一行 */
+    margin:4px 0;          /* 上下 4 像素间隔 */
+    padding:4px 8px;       /* 内边距 */
+    cursor:pointer;        /* 悬停变小手 */
+    border:none;           /* 去掉默认边框 */
+    border-radius:4px;     /* 小圆角 */
+    background:#222;       /* 深灰底 */
+    color:#fff;            /* 白字 */
+    font-size:12px;        /* 12 像素字号 */
+  }
+  #panel button:hover { background:#333; }   /* 悬停时提亮一档，让人知道这是可点的 */
+  /* 视角仰角滑块：一行横排 */
+  #panel .row {
+    display:flex;            /* 横着排 */
+    align-items:center;      /* 垂直居中 */
+    gap:6px;                 /* 元素间距 */
+    margin-top:8px;          /* 与上面的按钮隔开 */
+    color:#cbd5e1;           /* 浅灰字 */
+    font-size:12px;
+  }
+  #panel .row input[type=range] { width:118px; cursor:pointer; }  /* 滑块长度 */
+  #elevVal { color:#fff; min-width:32px; }                        /* 读数给固定宽度，拖动时不左右跳 */
+  /* 常驻说明：写清两个周期的关系 */
+  .tip {
+    color:#9ca3af;         /* 灰字，不抢视线 */
+    font-size:11px;
+    line-height:1.5;
+    max-width:250px;       /* 限宽，免得一行拉太长 */
+    margin-top:8px;        /* 与按钮隔开 */
+  }
+  /* 贴图解不开时的提示：平时不占位，出问题时才显示 */
+  .warn {
+    color:#f59e0b;         /* 琥珀色，比灰字显眼 */
+    font-size:11px;
+    margin-top:6px;
+    display:none;          /* 默认隐藏，脚本在解码失败时打开 */
+  }
+</style>
+</head>
+
+<body>
+<!-- 控制面板：三个图层开关、仰角滑块、周期读数 -->
+<div id="panel">
+  <button id="btnZeroAxis">参考线1：零度基准轴（玫红）</button>
+  <button id="btnTiltAxis">参考线2：倾斜地轴（蓝色）</button>
+  <button id="btnOrbitTrack">参考线3：南北极点绕行轨迹圆（黄色）</button>
+  <div class="row">
+    <span>视角仰角</span>
+    <input type="range" id="rngElev">
+    <span id="elevVal"></span>
+  </div>
+  <div class="tip"><span id="tipTiming"></span><br>仰角 0° = 视线穿过球心，南北半球各看一半；向正数走是抬高视线、从北侧俯看，向负数走是从南侧仰看。轨道圈比视线略高，0° 时压成很扁的椭圆，越偏越圆。</div>
+  <div class="warn" id="texWarn">贴图未能加载：画面只剩空球，其余部分照常运行</div>
+</div>
+
+<!-- 引入同目录的 three.min.js（Three.js r160）；下面所有 THREE.xxx 都出自这个库 -->
+<script src="three.min.js"></script>
+
+<!-- ========== 地球贴图数据（内嵌 base64） ========== -->
+<!-- 以 base64 内嵌的地球贴图（政区国界图，比例 2:1） -->
+<!-- 内嵌原因：file:// 下浏览器会以跨域为由拦掉外部 jpg -->
+<script>
+// ============================================================
+// 脚本主体 - 贴图地球 + 自转 + 地轴绕行
+// 层级关系：scene → orbitRoot(绕行) → tiltRoot(倾角) → spinRoot(自转) → 贴图球
+// 设计理念：倾角恒定不变；整根轴绕"空间竖直方向"一年转一圈，画出的那个圈就是北极点的绕行轨迹
+// ============================================================
+
+
+// ===================== 全局配置 CONFIG =====================
+// 尺寸、密度、配色、两个时间尺度都收在这里，改外观或节奏只动这一块
+
+// 地轴倾角（度）
+// 它同时决定"地轴歪多少"和"极点绕行轨迹圆多大"，所以只写这一次
+const TILT_DEG = 23.5;
+
+const CONFIG = {
+  // —— 尺寸与视角：球多大、能看到多少、画面多清晰 ——
+  radius: 150,          // 地球半径：球面与参考线的几何以它为基准，改它等于整体缩放
+  camDistance: 2000,    // 相机到地心的距离：透视下它和视野角一起决定球在画面里的大小（越远越小）
+  fov: 18,              // 垂直视野角：数值越小球在画面里越大
+  camElevation: 0,      // 初始视角仰角（面板滑块会覆盖它）：0 = 视线穿过球心，南北半球各看一半
+  elevMin: -23,         // 仰角滑块的左端：低于赤道平面的极限，再往下就接近从南侧仰视
+  elevMax: 23,          // 仰角滑块的右端：高于赤道平面的极限，再往上就接近正上方俯视、球会摊成圆盘
+  elevStep: 1,          // 滑块每格的度数：越小调得越细，但从头拖到尾要经过更多格
+  sceneHalfRatio: 1.5,  // 裁剪余量的倍数：以半径的倍数给球留出前后空间
+  maxPixelRatio: 2,     // 渲染像素比的上限：超过上限只是多花性能，画面不会更清楚
+  frameMargin: 1.06,    // 球在画面里至少留的边距倍数：窗口宽高比正常时用不到，只在窄到装不下时才生效
+
+  // —— 采样精度：点越密，曲线越圆滑（代价是对象和顶点变多）——
+  ringStepDeg: 5,       // 轨迹圆每隔多少度取一个点：越小越圆滑，代价是点多
+  sphereSegments: 96,   // 贴图球的水平分段：分段不够时棱面会往里凹，球面看上去有明显的折面
+  sphereRings: 48,      // 贴图球的上下分段：同上
+
+  // —— 实体杆与管的粗细、长度、棱数（长度以球半径为基准换算得出）——
+  tubeSides: 12,        // 杆和管"围一圈"的棱数：够圆滑即可，加多只增顶点
+  ringTubeRadius: 1.0,  // 轨迹圆那根"绳"的半径：透视会把它拉成前粗后细
+  axisTubeRadius: 0.8,  // 地轴那根"杆"的半径：与轨迹圈的粗细各自独立；交叉处谁离相机近谁露在上面
+  axisLength: 1.3,      // 参考轴伸出球外的倍数：轴的头尾必须露在球的轮廓之外才看得见
+
+  // —— 两个时间尺度 ——
+  spinPeriod: 4,        // 自转一圈用几秒：这段时长代表 1 天
+  orbitPeriod: 1460,    // 地轴指向绕行一圈用几秒：这段时长代表 1 年
+  orbitStartDeg: 90,    // 绕行的起始方位（度）：0 = 北极朝向镜头（夏至），90 = 地轴与视线垂直（春分/秋分）
+
+
+  colors: {
+    axisZero: 0xe0556e,        // 零度基准轴：玫红（偏冷的红，与轨迹圆的暗黄拉开色相）
+    axisTilt: 0x4488ff,        // 倾斜地轴：亮蓝
+    orbitTrack: 0xaaaa00,      // 绕行轨迹圆：暗黄
+    background: 0x05070d      // 深空底色：这里是清屏色；页面底色在 CSS 里另写一份同值
+  },
+};
+
+
+// 周期必须为正：填成 0 或负数会让角度算成 NaN，整颗球会静默消失
+for (const key of ['spinPeriod', 'orbitPeriod']) {
+  if (!(CONFIG[key] > 0)) {
+    console.error('配置 ' + key + ' 必须是正数，已经按 0.1 秒继续运行');
+    CONFIG[key] = 0.1;
+  }
+}
+
+
+// ===================== 由配置派生的几何量 =====================
+// 这几个数都能从"球半径 + 轴长倍数 + 倾角"推出来，所以只在这里算一次：
+// 相机定轨道圈平面、画轨迹圆、画地轴，全都引用这几个名字，谁也不再各算一遍
+
+const TILT_RAD = THREE.MathUtils.degToRad(TILT_DEG);  // 倾角（弧度）：全文件唯一的倾角弧度值
+const AXIS_HALF = CONFIG.radius * CONFIG.axisLength;  // 半根轴长：球心到轴的端点
+const ORBIT_RING_R = AXIS_HALF * Math.sin(TILT_RAD);  // 轨道圆半径
+const ORBIT_RING_Y = AXIS_HALF * Math.cos(TILT_RAD);  // 轨道圆高度：圆心到赤道平面的距离
+
+
+// ===================== 显示开关 SWITCH =====================
+// 图层显隐的状态只存在这里，是唯一真相
+
+const SWITCH = {
+  showAxisZero: false,   // false = 不显示玫红零度基准轴
+  showAxisTilt: false,   // false = 不显示蓝色倾斜地轴
+  showOrbitTrack: false  // false = 不显示黄色绕行轨迹圆
+};
+
+
+// ===================== 场景 / 相机 / 渲染器 =====================
+// 三件套：场景是舞台，相机是眼睛，渲染器负责算像素
+
+const scene = new THREE.Scene();  // 场景：物体挂上来才会被渲染
+
+// ---------- 裁剪面 near / far：为什么不写死两个数字 ----------
+// 先分清一件事：球在画面上占多大，只由「球半径、相机距离、视野角」三者决定，
+//               改 near/far 不会让球变大、变小或变形，它只管"多近多远的东西被判出局"
+// 它们唯一的职责是刚好把地球包住：
+//   · 近裁面若进到球体前方 → 球的前半被切掉
+//   · 远裁面若停在球心之前 → 球的后半被切掉（球背面会露出一个平面状的洞）
+// 还有一件隐蔽的事：近裁面离球越远，深度缓冲在球面附近的分辨能力越差，
+//   轨迹圈与地轴杆交叉处明明前后只差一点点，却会被判成同一个深度、互相覆盖，
+//   屏幕上看就是交叉处糊成一片——那不是画错了，是深度比不出来
+// 所以这里以「相机到地心的距离」为基准，上下各留半个场景的余量：
+//   相机距离一改，裁剪面自动跟着走，永远不会切到球；余量小，深度分辨能力就始终留在最高一档
+const SCENE_HALF = CONFIG.radius * CONFIG.sceneHalfRatio;     // 半个场景纵深：比球半径再宽一些，前后各留出余量
+// ---------- 仰角零点 ZERO_DEG ----------
+// 轨道圈悬在球心上方，零点有两种可选基准：
+//   · 视线穿过地心（下面取 0）：南北半球看得一样多，此时圈在画面上极扁；
+//   · 把零点定在轨道圈所在的高度：视线落在圈面之内，圈压成一条直线，代价是视线略微俯视、北半球看得更多。
+// 这里取前者，保证零点档南北对称；扁度与夹角的原理见下面仰角那一节。
+// 透视投影的屏幕坐标含除以深度这一步，水平圆在屏幕上一律呈椭圆，没有严格的直线。
+const ZERO_DEG = 0;  // 仰角零点（度）：0 表示视线穿过地心
+
+const camera = new THREE.PerspectiveCamera(
+  CONFIG.fov,                                                // 垂直视野角：数值越小球在画面里越大
+  window.innerWidth / window.innerHeight,                    // 宽高比：窗口一变就要重设
+  Math.max(CONFIG.camDistance - SCENE_HALF, 1),              // 近裁面：停在球体前缘之外；兜底不小于 1，免得越过相机
+  CONFIG.camDistance + SCENE_HALF                            // 远裁面：停在球体后缘之外
+);
+camera.position.set(0, 0, CONFIG.camDistance);               // 先摆在球心正前方，随后由 applyElevation() 摆到指定仰角
+
+// 透视相机没有"四个边界"，要同步的是宽高比和视野角：窗口一变只改这两处，画面就不会被拉扁
+function updateCameraAspect() {
+  const aspect = window.innerWidth / window.innerHeight;       // 宽高比跟着窗口走
+  camera.aspect = aspect;
+  // 视野角只管上下：窗口宽不到高的一半时，水平方向就先装不下球了，球会被左右裁掉
+  // 所以两个方向各算一次"要装下球需要多大的半视野"，取较大的那个角：
+  //   常规宽屏下它永远是最初配的那个角；只有极窄窗口才会自动放宽，让球始终完整
+  const baseTan = Math.tan(THREE.MathUtils.degToRad(CONFIG.fov / 2));                // 配置给的半视野（正切）
+  const fitTan  = (CONFIG.radius * CONFIG.frameMargin) / (aspect * CONFIG.camDistance);  // 横向装下球所需的半视野（正切）
+  camera.fov = 2 * THREE.MathUtils.radToDeg(Math.atan(Math.max(baseTan, fitTan)));    // 取两者中较大的那个角
+  camera.updateProjectionMatrix();                            // 改完参数要重算一次投影矩阵
+}
+updateCameraAspect();  // 启动时先按当前窗口定一次
+// 「视线与轨道圈平面的夹角」唯一决定"水平的绕行圆在屏幕上被压扁多少"：
+//   夹角 0°   → 视线落在圆所在的平面里，圆只剩左右一维，压成极扁的椭圆（不是严格直线）；
+//   夹角 90°  → 从正上方俯视，圆才是正圆；
+//   中间任何角度都是椭圆，短轴/长轴 = sin(夹角)。三种情形是同一条圆的三种看法，不是三个模型。
+// 改仰角是"换个地方站着看"，不是"把相机原地拧一下"：
+//   相机沿以球心为圆心的圆弧移动，与球心的距离保持不变；朝向同步低头，视线始终穿过球心。
+//   于是球在画面里的位置不动，变的只是能看到球面的哪一部分（抬得越高，越看见北半球）。
+// 滑块范围由配置给定：视线相对赤道平面的夹角就限在这个区间里，球始终还有"球"的样子；
+//   再往上就接近正上方俯视，球会摊成一个圆盘，看不出立体的地球了
+function applyElevation(deg) {
+  const rad = THREE.MathUtils.degToRad(ZERO_DEG + deg);       // 零点 + 滑块给的仰角
+  camera.position.set(                                        // 沿圆弧把相机抬上去：球心是圆心，半径不变
+    0,
+    CONFIG.camDistance * Math.sin(rad),                         // 抬高多少
+    CONFIG.camDistance * Math.cos(rad)                          // 退后多少
+  );
+  camera.rotation.set(-rad, 0, 0);                            // 低头同样的角度，视线正好穿过球心
+}
+applyElevation(CONFIG.camElevation);  // 启动时先按配置摆一次
+
+const renderer = new THREE.WebGLRenderer({antialias:true});    // 打开抗锯齿，边缘才不锯齿
+document.body.appendChild(renderer.domElement);                // 画布塞进页面
+renderer.setClearColor(CONFIG.colors.background);              // 清屏色：色的唯一出处是配置
+
+// 画布尺寸与像素比只在这一处设定：启动时和窗口变化时都调它，封顶值也就只有一个出处
+function fitCanvas() {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, CONFIG.maxPixelRatio));  // 按屏幕像素比渲染，封顶值取自配置
+  renderer.setSize(window.innerWidth, window.innerHeight);       // 画布铺满窗口
+}
+fitCanvas();  // 启动时先把画布按当前窗口铺一次
+
+
+// ===================== 材质缓存 mat =====================
+// 同一种颜色只建一份材质，各处共用这一份，省显存也省得改颜色时漏掉几处
+
+const mat = {
+  axisZero: new THREE.MeshBasicMaterial({color: CONFIG.colors.axisZero}),              // 零度基准轴（玫红）：实体杆
+  axisTilt: new THREE.MeshBasicMaterial({color: CONFIG.colors.axisTilt}),              // 倾斜地轴（亮蓝）：实体杆
+  orbitTrack: new THREE.MeshBasicMaterial({color: CONFIG.colors.orbitTrack})       // 绕行轨迹圆（暗黄）：画成细管，是实体不是线
+};
+
+
+// ===================== 工具函数：造杆 =====================
+// 把轴翻译成一根圆柱：轴是有真实粗细的实体，透视会自己把靠近相机的部分画粗
+
+// 造一根杆：两端封口的圆柱，用来当轴
+// 为什么不用线：WebGL 的线宽多数平台被锁死 1 像素，改不粗；
+//   而轨迹圈是有直径的管子，两样东西互相遮挡只能靠真实几何来分先后
+// 参数：material 该杆使用的材质（长度固定在 AXIS_HALF×2，粗细取自配置）
+// 返回：Three.js 的 Mesh 对象
+function createAxisRod(material) {
+  // 圆柱默认就沿 Y 轴立着，长度按轴长给，粗细来自配置
+  const geo = new THREE.CylinderGeometry(
+    CONFIG.axisTubeRadius, CONFIG.axisTubeRadius,  // 底面、顶面半径：两端一样粗
+    AXIS_HALF * 2,                                 // 长度：南北两端之间
+    CONFIG.tubeSides, 1, false                     // 棱数取自配置；高度只分 1 段；不开口（两端封住）
+  );
+  return new THREE.Mesh(geo, material);
+}
+
+
+// ===================== 三层分组 =====================
+// 三层各管一件事，互不干扰，这是"倾斜 + 自转 + 绕行"能同时进行又不打架的关键：
+//   orbitRoot ：绕空间竖直方向转 → 地轴指向绕行画圈（一年一圈）
+//   tiltRoot   ：固定歪一个倾角   → 地轴相对竖直方向永远保持这个角
+//   spinRoot   ：绕自己的地轴转   → 自转
+// 为什么倾角加在 X 轴上：加在 X 轴上，地轴是"朝镜头方向倒"的，绕行一圈的过程中
+//   它的倾斜方向在空间里连续改变，看上去像陀螺在点头；若加在 Z 轴上，倾斜只在画面平面内张合
+
+const orbitRoot = new THREE.Group();                // 绕行层：转它 = 整根轴绕竖直方向转一圈
+scene.add(orbitRoot);                               // 绕行层挂场景，是地球的最外层
+const tiltRoot = new THREE.Group();                 // 倾角层：转它 = 把整颗球歪一个固定角度
+tiltRoot.rotation.x = TILT_RAD;                     // 倾角只设一次，之后不再变
+orbitRoot.add(tiltRoot);                            // 倾角层挂绕行层：绕行会带着倾角一起走
+const spinRoot = new THREE.Group();                 // 自转层：转它 = 地球绕自己的轴转
+tiltRoot.add(spinRoot);                             // 自转层挂倾角层：自转轴就是被歪过的 Y 轴
+
+
+// ===================== 地球贴图层 =====================
+// 一个实心球 + 一张等经纬投影的政区国界图
+// 贴图与页面同目录同来源，浏览器才允许把它直接交给显卡当纹理（跨来源的本地图片会被判为不可读）
+// 关键：three 的球面 UV 与这里的经度体系差 90°，必须绕 Y 轴补转 -90°，
+//      否则贴图的 0° 经线会与本模型的 0° 相差四分之一圈，看着"地图整体偏了"
+
+const textureLoader = new THREE.TextureLoader();  // 贴图加载器
+const earthTexture = textureLoader.load(          // 加载同目录下的贴图文件
+  'map.jpg',
+  undefined,                       // 加载成功不需要回调：动画循环一直在画
+  undefined,
+  () => {                          // 读不到或解不开：控制台留一行，面板上也给出可见提示
+    console.warn('地球贴图未能加载');
+    const warn = document.getElementById('texWarn');
+    if (warn) warn.style.display = 'block';
+  }
+);
+earthTexture.colorSpace = THREE.SRGBColorSpace;                      // 声明为 sRGB 图片，颜色才不会发灰
+earthTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();  // 斜看时贴图更清晰（抗模糊）
+
+// 球体分段越细，表面越接近正球（分段不够时球面会显出折面）
+const earthGeo = new THREE.SphereGeometry(CONFIG.radius, CONFIG.sphereSegments, CONFIG.sphereRings);
+const earthMat = new THREE.MeshBasicMaterial({ map: earthTexture });
+const earthMesh = new THREE.Mesh(earthGeo, earthMat);  // 几何体+材质 = 贴图球
+earthMesh.rotation.y = -Math.PI / 2;                   // 把贴图 0° 经线转到本模型 0°（+Z 正前方）
+spinRoot.add(earthMesh);                               // 挂到自转层：随地球一起自转
+
+
+// ===================== 参考线1：零度基准轴（玫红） =====================
+// 挂在场景而不是地球上，所以地球怎么转它都不动，
+// 代表"假如地轴不歪，自转轴应有的方向"。球是实心的，它只露出球外的两段
+// 画成实体杆而不是一像素的线：理由见 createAxisRod
+
+const axisZeroRod = createAxisRod(mat.axisZero);   // 玫红杆：竖直、永远不动
+scene.add(axisZeroRod);                            // 挂场景，不挂地球
+
+
+// ===================== 参考线2：倾斜地轴（蓝） =====================
+// 挂在倾角层上，所以它固定歪一个倾角，并随绕行在空中摆动，代表真实的自转轴
+// 它相对零度基准轴歪出的那个角，就是这颗球要讲的"地轴倾角"
+
+const tiltAxisRod = createAxisRod(mat.axisTilt);    // 蓝杆：歪着、跟着绕行摆动
+tiltRoot.add(tiltAxisRod);                          // 挂倾角层，不挂自转层：地轴不跟着地球自转
+
+
+// ===================== 参考线3：南北极点绕行轨迹圆（黄） =====================
+// 极点在"地轴的延长线"上（轴的伸出长度取自配置），倾角恒定、只有绕行层在转，
+//   所以极点在空中的轨迹是以竖直方向为轴的水平圆：
+//   半径是半轴长 × sin(倾角)，圆心离赤道平面的距离是半轴长 × cos(倾角)
+// 北极点在上、南极点在下：两个圈半径相同、上下对称，所以抽成一个"按高度造圆"的函数
+// 关键：圈必须落在"轴端点实际要走的那条线上"，也就是半径乘上轴长倍数；
+//   若按"球半径"去画，圈正好落在球面上、和贴图上的极圈线重合——看不出它是另一条轨道，还会被球挡掉一半
+
+function createOrbitRing(y) {                                 // y：圈心离赤道平面的高度，正数在上、负数在下
+  const pts = [];                                             // 这个圈的采样点
+  for(let a = 0; a < 360; a += CONFIG.ringStepDeg){           // 按配置的角度间隔取点，圆看着就光滑了
+    const ang = THREE.MathUtils.degToRad(a);                  // 转角转弧度
+    pts.push(new THREE.Vector3(ORBIT_RING_R * Math.sin(ang), y, ORBIT_RING_R * Math.cos(ang)));
+  }
+  // 画成"细管"而不是"线"：理由同造杆（线宽改不粗）；管子有真实粗细，透视会把近段画粗、远段画细
+  // 首尾相连的圆用闭合曲线喂给 TubeGeometry，管身才不会在接缝处断一截
+  const curve = new THREE.CatmullRomCurve3(pts, true);
+  const geo = new THREE.TubeGeometry(curve, pts.length, CONFIG.ringTubeRadius, CONFIG.tubeSides, true);  // 棱数取自配置：太少会看出折角，太多只增顶点
+  return new THREE.Mesh(geo, mat.orbitTrack);
+}
+
+const orbitRings = new THREE.Group();                          // 两条圈装进一组：开关只改这一层的 visible
+orbitRings.add(createOrbitRing( ORBIT_RING_Y));                // 北极点轨迹圈：赤道平面之上一圈
+orbitRings.add(createOrbitRing(-ORBIT_RING_Y));                // 南极点轨迹圈：同半径，镜像到赤道平面之下
+scene.add(orbitRings);                                        // 挂场景：轨道在空中不动，动的是地轴
+
+
+// ===================== 显示开关：状态 → 可见性 =====================
+// 三个开关的动作都一样，所以只写一份逻辑、每个按钮登记一行，避免复制粘贴
+
+// 把 SWITCH 里的状态翻译成"每一层该不该显示"——全文件只有这里做这件事
+function applySwitches() {
+  axisZeroRod.visible     = SWITCH.showAxisZero;      // 玫红零度基准轴
+  tiltAxisRod.visible     = SWITCH.showAxisTilt;      // 蓝色倾斜地轴
+  orbitRings.visible      = SWITCH.showOrbitTrack;     // 黄色轨迹圆：南北两极两条一起显示
+}
+
+// 给一个按钮绑上"点一下切换"的行为
+// 参数：buttonId 按钮的 id   stateKey SWITCH 里对应的那个开关名
+function bindToggle(buttonId, stateKey) {
+  document.getElementById(buttonId).onclick = () => {
+    SWITCH[stateKey] = !SWITCH[stateKey];  // 状态取反
+    applySwitches();                       // 按新状态刷新可见性
+  };
+}
+
+bindToggle('btnZeroAxis',     'showAxisZero');      // 按钮：玫红零度基准轴
+bindToggle('btnTiltAxis',     'showAxisTilt');      // 按钮：蓝色倾斜地轴
+bindToggle('btnOrbitTrack',   'showOrbitTrack');   // 按钮：黄色轨迹圆（南北两条）
+applySwitches();                                    // 启动时按 SWITCH 定一次初始显隐
+
+
+// ===================== 面板提示：周期读数 =====================
+// 面板读数：两个周期原样取自配置，秒数是观看用的节奏，不代表现实里一天、一年各有多长
+// spinPeriod 是自转一圈在屏幕上用几秒，orbitPeriod 是绕行一圈用几秒
+// 括号里标的是两个周期各自对应的天文含义（一天 / 一年）；要让两者真正成比例，orbitPeriod 需取 spinPeriod 的 365 倍
+document.getElementById('tipTiming').textContent =
+  '自转一圈 ' + CONFIG.spinPeriod + ' 秒（1 天）；地轴指向绕行一圈 ' + CONFIG.orbitPeriod + ' 秒（1 年）。';
+
+
+// ===================== 视角仰角滑块 =====================
+// 拖动即时生效：仰角只挪相机、不动任何几何，改一次几乎不花时间，所以不值得再多一步"应用"
+// 滑块的初值从 CONFIG 取，配置才是唯一真相，界面上不另写一遍数字
+const rngElev = document.getElementById('rngElev');   // 滑块
+rngElev.min  = CONFIG.elevMin;                        // 左右端点：配置写入控件，页面上不另写一遍
+rngElev.max  = CONFIG.elevMax;
+rngElev.step = CONFIG.elevStep;
+const elevVal = document.getElementById('elevVal');   // 读数
+rngElev.value = CONFIG.camElevation;                  // 初值：配置 → 滑块
+elevVal.textContent = CONFIG.camElevation + '°';      // 初值：配置 → 读数
+rngElev.addEventListener('input', () => {             // 拖动时（每一次移动都触发）
+  const deg = Number(rngElev.value);                  // 读当前值
+  applyElevation(deg);                                // 重摆相机
+  elevVal.textContent = deg + '°';                    // 同步读数
+});
+
+
+// ===================== 动画循环 =====================
+// 两个周期同时走：地轴绕行与自转各按配置的周期运行，两者互不干涉（因为各自转自己那一层）
+// 角度按累计的秒数算，而不是"每帧加一点"：这样不管帧率高低，转到哪个位置都由时间说了算
+
+const ORBIT_START_RAD = THREE.MathUtils.degToRad(CONFIG.orbitStartDeg);  // 起点方位（弧度）：启动时算一次
+const ORBIT_SPEED = Math.PI * 2 / CONFIG.orbitPeriod;                    // 绕行角速度（弧度/秒）
+const SPIN_SPEED  = Math.PI * 2 / CONFIG.spinPeriod;                     // 自转角速度（弧度/秒）
+
+let lastFrameMs = null;   // 上一帧的时间戳
+let elapsedSec = 0;       // 累计的秒数：只统计页面前台可见的那些时间
+function animate(now) {
+  requestAnimationFrame(animate);                        // 预约下一帧，形成循环
+  if (lastFrameMs === null) lastFrameMs = now;           // 第一帧只记时间，不推进
+  let dt = (now - lastFrameMs) / 1000;                   // 与上一帧相隔多少秒
+  lastFrameMs = now;
+  if (document.hidden) return;                           // 页面在后台：不推进也不画，回到前台接着原位置走
+  if (dt > 0.5) dt = 0;                                  // 间隔过长（切后台、长卡顿）：这一帧不补时间，回来时不跳段
+  elapsedSec += dt;                                      // 正常帧按真实间隔推进
+  orbitRoot.rotation.y = ORBIT_START_RAD - elapsedSec * ORBIT_SPEED;  // 负号：与自转反向；转一圈 = 一年
+  spinRoot.rotation.y = elapsedSec * SPIN_SPEED;                      // 自转：从北极上方看是逆时针，也就是自西向东
+  renderer.render(scene, camera);                        // 算这一帧的像素
+}
+requestAnimationFrame(animate);  // 启动循环
+
+
+// ===================== 窗口尺寸自适应 =====================
+window.addEventListener('resize', ()=>{                     // 监听窗口尺寸变化
+  updateCameraAspect();                                      // 宽高比与视野角跟着窗口重算
+  fitCanvas();                                               // 像素比与画布尺寸：换到缩放不同的屏幕上，不重设就会发虚
+  renderer.render(scene, camera);                            // 立刻补画一帧，窗口变化不留旧画面
+});
+
+</script>
+</body>
+</html>
