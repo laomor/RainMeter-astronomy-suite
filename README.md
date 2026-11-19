@@ -240,7 +240,7 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
   > 要是你正打算把光照球搬进网页或 App 里，下面这六版别一个个乱点，先按「手上有木有天气 API」挑一遍，能省点弯路：
 
   | 点开看 | 什么时候挑它 | 
-  |---|---|
+  |----|---|
   | [自动旋转版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/auto/) | 正式版之一，主要是先让你看清「地轴倾斜」到底是个啥：球自己转，轴歪着 23.5°，再绕空间竖直方向一年绕一圈 |
   | [地轴倾斜 · 传入直射经纬度](https://laomor.github.io/RainMeter-astronomy-suite/Globe/tilt-subsolar/) | 手上有天气 API、能算出太阳直射经纬度的，就挑这个，移植时基本能当成品用：把算出来的经纬度喂进来就行 |
   | [地轴倾斜 · 观测点版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/tilt-observer/) | 不想接天气 API 的挑这个：只给一个观测点经纬度，太阳偏多少、挂多高，它自己算 |
@@ -248,7 +248,7 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
   | [球体旋转 · 观测点版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/spin-observer/) | 不想接 API 的那种，换球体旋转的模型 |
   | [政区国界贴图版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/) | 正式版的另一个分支，只换了张贴图。嫌代码画的经纬线啰嗦、想要画面干净点的，用这个——网格是贴图自带的，不用你画 |
 
-  > **交代几句，搬之前值得看一眼**：能直接拿去用的那几种，代码和贴图都摆在[同一个目录里](https://github.com/laomor/RainMeter-astronomy-suite/tree/main/Globe)，你只管换数据源，别的地方不用动。至于我算得对不对——我一个小白自己一点点摸出来的，高纬度、跨年跨月这类边角没一个个验过，转得顺、读数看着对，也不等于哪一天哪一地都准。**建议照着思路自己重写一遍**，写出来才知道卡在哪；要是它刚好合你用，直接搬走省点事也行。<br>
+  > **交代几句，搬之前值得看一眼**：能直接拿去用的那几种，代码和贴图都摆在[Globe](https://github.com/laomor/RainMeter-astronomy-suite/tree/main/Globe)里，你只管换数据源，别的地方不用动。至于我算得对不对——我一个小白自己一点点摸出来的，高纬度、跨年跨月这类边角没一个个验过，转得顺、读数看着对，也不等于哪一天哪一地都准。**建议照着思路自己重写一遍**，写出来才知道卡在哪；要是它刚好合你用，直接搬走省点事也行。<br>
   >
   > **顺带记个坑**：第一版（就是最后那个政区国界贴图版）是「页面 + 库 + 贴图」拆成三个文件，其余几版都做成单个 HTML，图内嵌在文件里，下回来双击就能开。反倒是拆开的那种，**本地双击看不到贴图**——浏览器不许它把同目录的图片拿来当纹理（会报 `SecurityError` ），非得放到网站上或本地起个服务。别在本地一部署一测就以为自己写错了。
   >
