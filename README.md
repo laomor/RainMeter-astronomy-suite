@@ -236,21 +236,23 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
 - **现在的土办法**：我现在用的 360 张图，默认太阳直射赤道，没去模拟南北回归线，极昼极夜根本看不出来。
 - **高级玩法**：换到 Web/App 上，直接上 Three.js 或者原生 3D 引擎。搞一张地球皮贴上去，用 Shader 结合太阳直射的经纬度算，什么季节、什么纬度都给你算得明明白白。
 
-  > 这条我没光说，试了一下。一张地球皮贴在一个真球上，直射点、晨昏线、地轴倾角全交给几何去算，360 张图那套就省了。我挂在 GitHub Pages 上了，点开就能转，不用装 Rainmeter、不用配 Key，手机上也凑合看，你可以看看演示再决定用不用。<br>
-  > 要是你正打算把光照球搬进网页或 App 里，下面这六版别一个个乱点，先按「手上有木有天气 API」挑一遍，能省点弯路：
+  > 这条我没光说，试了一下。一张地球皮贴在一个真球上，直射点、晨昏线、地轴倾角全交给几何去算，360 张图那套就省了。我挂在 GitHub Pages 上了，点开就能转，不用装 Rainmeter、不用配 Key，手机上也凑合看。
+  >
+  > 下面这几版不是一个模子刻出来的“六个成品”，是我为了讲清同一件事换的几种看法。挑之前先想清楚自己要干什么，别顺着表一个个点：
 
-  | 点开看 | 什么时候挑它 | 
+  | 点开看 | 它解决的问题 |
   |----|---|
-  | [自动旋转版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/auto/) | 正式版之一，主要是先让你看清「地轴倾斜」到底是个啥：球自己转，轴歪着 23.5°，再绕空间竖直方向一年绕一圈 |
-  | [地轴倾斜 · 传入直射经纬度](https://laomor.github.io/RainMeter-astronomy-suite/Globe/tilt-subsolar-manual/) | 手上有天气 API、能算出太阳直射经纬度的，就挑这个，移植时基本能当成品用：把算出来的经纬度喂进来就行 |
-  | [地轴倾斜 · 观测点版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/tilt-subsolar-auto/) | 不想接天气 API 的挑这个：只给一个观测点经纬度，太阳偏多少、挂多高，它自己算 |
-  | [球体旋转 · 传入直射经纬度](https://laomor.github.io/RainMeter-astronomy-suite/Globe/spin-subsolar-manual/) | 同第二种，只是换一套建模方式（季节交给球自己转出来），你可以两种都试试，看哪种更好接 |
-  | [球体旋转 · 观测点版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/spin-subsolar-auto/) | 不想接 API 的那种，换球体旋转的模型 |
-  | [政区国界贴图版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/) | 正式版的另一个分支，只换了张贴图。嫌代码画的经纬线啰嗦、想要画面干净点的，用这个——网格是贴图自带的，不用你画 |
+  | [自动旋转版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/auto/) | 我没精力给 365 天各截一张图（翻起来也累），所以干脆让它自己转：4 秒过一天，转完一年 20 多分钟，地轴怎么歪、一年里指向怎么变，你自己看 |
+  | [地轴倾斜 · 观测点版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/tilt-subsolar-auto/) | **要移植就挑这版**：只给一个观测点的经纬度，太阳偏多少、挂多高，全交给几何算，不用你接天气 API |
+  | [球体旋转 · 观测点版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/spin-subsolar-auto/) | 同一个目的，换一套建模：季节交给球自己转出来。两版都点开看看，哪套更好接就用哪套 |
+  | [地轴倾斜 · 传入直射经纬度](https://laomor.github.io/RainMeter-astronomy-suite/Globe/tilt-subsolar-manual/) | 演示用，不是移植目标：等不及那 20 分钟转完一年，就喂一组经纬度，直接看那一天那一刻的状态 |
+  | [球体旋转 · 传入直射经纬度](https://laomor.github.io/RainMeter-astronomy-suite/Globe/spin-subsolar-manual/) | 同上，球体旋转那套的“快速看某一天”版本 |
+  | [政区国界贴图版](https://laomor.github.io/RainMeter-astronomy-suite/Globe/) | 换风格的成品分支：我翻了好几张贴图，别的大多被云层糊住、或者干脆没有南极，这张是挑着顺眼的；顺便演示两件事——经纬线可以一点不画（网格是贴图自带的），页面、库、贴图也能拆成三个文件，方便单独下那张图 |
 
-  > **交代几句，搬之前值得看一眼**：能直接拿去用的那几种，代码和贴图都摆在 [`Globe`](https://github.com/laomor/RainMeter-astronomy-suite/tree/main/Globe) 里，你只管换数据源，别的地方不用动。至于我算得对不对——我一个小白自己一点点摸出来的，高纬度、跨年跨月这类边角没一个个验过，转得顺、读数看着对，也不等于哪一天哪一地都准。**建议照着思路自己重写一遍**，写出来才知道卡在哪；要是它刚好合你用，直接搬走省点事也行。<br>
+  > **交代几句，搬之前值得看一眼**：真正能当成品搬走的是**带观测点**的那两版，代码和贴图都摆在 [`Globe`](https://github.com/laomor/RainMeter-astronomy-suite/tree/main/Globe) 里。这两版不接任何外部数据——把观测点的经纬度一填，太阳偏多少、挂多高都由它自己算，所以你要动的就那一个经纬度；嫌球皮不顺眼，再换张贴图。传入经纬度那两版是给你快速看某一天用的，不算成品。至于我算得对不对——我一个小白自己一点点摸出来的，高纬度、跨年跨月这类边角没一个个验过，转得顺、读数看着对，也不等于哪一天哪一地都准。**建议照着思路自己重写一遍**，写出来才知道卡在哪；要是它刚好合你用，直接搬走省点事也行。<br>
   >
   > **顺带记个坑**：第一版（就是最后那个政区国界贴图版）是「页面 + 库 + 贴图」拆成三个文件，其余几版都做成单个 HTML，图内嵌在文件里，下回来双击就能开。反倒是拆开的那种，**本地双击看不到贴图**——浏览器不许它把同目录的图片拿来当纹理（会报 `SecurityError` ），非得放到网站上或本地起个服务。别在本地一部署一测就以为自己写错了。
+
   >
   > **还有：** <br>
   > 读数报"太阳高度 31.16°"，看的人还得自己换算，所以我把高度角翻成词：深夜（人都睡了，没睡的都是夜猫子）→ 凌晨（出夜+黎明）→ 早晨（都起了，开始活动）→ 上午（上班摸鱼）→ 正午（吃饭）→ 下午（接着熬）→ 傍晚（收摊回家）→ 入夜（吃饭、看电视，一句话：放松时刻）→ 半夜（该睡了）→ 又转回深夜。<br>
