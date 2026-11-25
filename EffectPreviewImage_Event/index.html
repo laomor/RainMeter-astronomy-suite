@@ -86,6 +86,22 @@
   }
   .hint b{color:var(--ink);}
 
+  .spd{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    margin:12px 2px 0;font-size:11px;color:rgba(255,255,255,.4);
+  }
+  .spd-b{
+    appearance:none;border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);
+    border-radius:6px;height:24px;padding:0 9px;
+    font:inherit;font-size:11px;cursor:pointer;
+    font-variant-numeric:tabular-nums;
+  }
+  .spd-b:hover{background:rgba(255,255,255,.1);}
+  .spd-b.on{
+    border-color:rgba(255,215,0,.5);color:#FFD700;
+    background:rgba(255,215,0,.09);
+  }
   .note{
     margin:14px 4px 0;font-size:11.5px;line-height:1.7;color:rgba(255,255,255,.38);
   }
@@ -108,6 +124,13 @@
     <button class="btn" id="now">现在</button>
     <input class="scrub" id="scrub" type="range" min="0" max="1" step="60">
     <span class="clock" id="clock"></span>
+  </div>
+  <div class="spd" id="spd">
+    <span>1 秒 =</span>
+    <button class="spd-b" data-s="1800" title="1 秒走 30 分钟">30 分</button>
+    <button class="spd-b" data-s="900" title="1 秒走 15 分钟">15 分</button>
+    <button class="spd-b" data-s="600" title="1 秒走 10 分钟">10 分</button>
+    <button class="spd-b" data-s="300" title="1 秒走 5 分钟">5 分</button>
   </div>
 
   <div class="hint">把鼠标放到右上角的 <b>S</b> / <b>M</b>（或者太阳、月亮本身）上，画面就切去看太阳、月亮那五个事件的时刻。</div>
@@ -438,7 +461,7 @@ for (let t = SUN[0].t; t <= SUN[SUN.length - 1].t; t += 600){
 const MIN_T = firstT != null ? firstT : SUN[0].t;
 const MAX_T = lastT  != null ? lastT  : SUN[SUN.length - 1].t;
 
-const state = { now: 0, playing: false, speed: 3600 };
+const state = { now: 0, playing: false, speed: 1800 };
 
 const el = {
   play: document.getElementById("play"),
@@ -488,6 +511,22 @@ el.scrub.addEventListener("input", function(){
   state.now = Number(el.scrub.value);
   paint();
 });
+/* 播放速度：1 秒屏幕对应多少分钟数据，数值越小越慢 */
+const speedBtns = document.querySelectorAll(".spd-b");
+function markSpeed(){
+  for (let i = 0; i < speedBtns.length; i++){
+    speedBtns[i].classList.toggle("on",
+      Number(speedBtns[i].dataset.s) === state.speed);
+  }
+}
+for (let i = 0; i < speedBtns.length; i++){
+  speedBtns[i].addEventListener("click", function(){
+    state.speed = Number(this.dataset.s);
+    prevTs = 0;          // 改速度后重算帧间隔，免得第一帧跳一大步
+    markSpeed();
+  });
+}
+markSpeed();
 
 window.addEventListener("keydown", function(e){
   if (e.key === "ArrowLeft" || e.key === "ArrowRight"){
