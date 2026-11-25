@@ -124,6 +124,7 @@
 /* ============================================================
    数据：仓库 Event Time Case 的两个时间戳文件（与皮肤同源）
    ============================================================ */
+/* === DATA SUN BEGIN === */
 const SUN_RAW = `1795423980Sunset
 1795475280Sunrise
 1795510320Sunset
@@ -136,7 +137,9 @@ const SUN_RAW = `1795423980Sunset
 1795821180Sunrise
 1795855800Sunset
 1795907640Sunrise`;
+/* === DATA SUN END === */
 
+/* === DATA MOON BEGIN === */
 const MOON_RAW = `1795418940Moonrise
 1795473540Moonset
 1795507800Moonrise
@@ -149,6 +152,7 @@ const MOON_RAW = `1795418940Moonrise
 1795834800Moonset
 1795869600Moonrise
 1795923480Moonset`;
+/* === DATA MOON END === */
 
 function parseEvents(raw){
   return raw.trim().split("\n").map(function(line){
