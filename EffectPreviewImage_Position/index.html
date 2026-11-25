@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Position Simulator · 位置模拟</title>
+<style>
+  :root{
+    --sun:#FFD700;
+    --moon:#1E90FF;
+    --ink:rgba(255,255,255,.92);
+    --ink-dim:rgba(255,255,255,.55);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:#05070d;
+    background-image:radial-gradient(120% 90% at 50% 0%, #131c33 0%, #05070d 62%);
+    color:var(--ink);
+    font-family:"Trebuchet MS","Microsoft YaHei",system-ui,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 18px;
+  }
+  .app{width:100%;max-width:660px;}
+  .head{display:flex;align-items:baseline;gap:10px;margin:0 4px 14px;}
+  .head h1{font-size:19px;margin:0;letter-spacing:.5px;}
+  .head span{font-size:12px;color:var(--ink-dim);letter-spacing:.5px;}
+
+  .stage{
+    position:relative;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.07);
+    background:linear-gradient(180deg,#121c33 0%,#0a1120 100%);
+    box-shadow:0 18px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    overflow:hidden;
+  }
+  canvas{display:block;width:100%;height:auto;}
+
+  .tip{
+    position:absolute;
+    transform:translate(-50%,-140%);
+    padding:6px 9px;
+    border-radius:7px;
+    background:rgba(8,12,22,.92);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:12px;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .tip.on{opacity:1;}
+
+  .bar{
+    display:flex;align-items:center;gap:10px;
+    margin-top:16px;
+    padding:0 2px;
+  }
+  .btn{
+    appearance:none;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    color:var(--ink);
+    border-radius:8px;
+    height:34px;
+    padding:0 13px;
+    font:inherit;font-size:13px;
+    cursor:pointer;
+  }
+  .btn:hover{background:rgba(255,255,255,.1);}
+  .btn.primary{min-width:74px;}
+
+  .scrub{
+    -webkit-appearance:none;appearance:none;
+    flex:1;height:4px;border-radius:2px;
+    background:rgba(255,255,255,.14);
+    outline:none;
+  }
+  .scrub::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--ink);border:none;cursor:pointer;
+    box-shadow:0 0 0 1px rgba(0,0,0,.5);
+  }
+  .scrub::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;background:var(--ink);
+    border:none;cursor:pointer;
+  }
+
+  .clock{
+    font-variant-numeric:tabular-nums;
+    font-size:13px;color:var(--ink-dim);
+    white-space:nowrap;min-width:104px;text-align:right;
+  }
+
+  .readout{
+    display:flex;gap:26px;flex-wrap:wrap;
+    margin:14px 2px 0;
+    font-size:12.5px;color:var(--ink-dim);
+  }
+  .readout b{color:var(--ink);font-weight:600;}
+  .readout i{font-style:normal;font-variant-numeric:tabular-nums;}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px;}
+
+  .note{
+    margin:18px 4px 0;font-size:11.5px;line-height:1.7;color:rgba(255,255,255,.38);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="head">
+    <h1>位置模拟</h1>
+    <span>POSITION SIMULATOR · 同款坐标、同款抛物线</span>
+  </div>
+
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="tip" id="tip"></div>
+  </div>
+
+  <div class="bar">
+    <button class="btn primary" id="play">▶ 播放</button>
+    <button class="btn" id="now">现在</button>
+    <input class="scrub" id="scrub" type="range" min="0" max="1" step="60">
+    <span class="clock" id="clock"></span>
+  </div>
+
+  <div class="readout">
+    <span><span class="dot" style="background:var(--sun)"></span>太阳 <b id="sunState">—</b> · 日出 <i id="sunRise">—</i> · 日落 <i id="sunSet">—</i></span>
+    <span><span class="dot" style="background:var(--moon)"></span>月亮 <b id="moonState">—</b> · 月出 <i id="moonRise">—</i> · 月落 <i id="moonSet">—</i></span>
+  </div>
+
+  <div class="note">
+    一天只画一条轴。轴的两头不写死成零点，落在「日落→日出」的中点上：一天的起止让事件自己定，季节一变，整条轴跟着前后挪一点。横轴量的是这个循环走到了哪儿，一天正好铺满 360px。<br>
+    纵轴不用角度，用抛物线。天体在地平线上时开口朝下，升落之间摸到顶点；在地平线下时开口朝上，沉到两点正中最底。太阳的顶点、底点还不钉死，跟着当天昼长、夜长前后挪 ±15px——夏天白昼长，太阳就该高一点。<br>
+    参数：420×256 的画板、IconSize 21、Length 360、OffsetValue 15。
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   数据：仓库 Event Time Case 的两个时间戳文件（未压缩时与皮肤同源）
+   ============================================================ */
+const SUN_RAW = `1795423980Sunset
+1795475280Sunrise
+1795510320Sunset
+1795561800Sunrise
+1795596720Sunset
+1795648260Sunrise
+1795683060Sunset
+1795734720Sunrise
+1795769460Sunset
+1795821180Sunrise
+1795855800Sunset
+1795907640Sunrise`;
+
+const MOON_RAW = `1795418940Moonrise
+1795473540Moonset
+1795507800Moonrise
+1795564620Moonset
+1795597380Moonrise
+1795655340Moonset
+1795687680Moonrise
+1795745460Moonset
+1795778580Moonrise
+1795834800Moonset
+1795869600Moonrise
+1795923480Moonset`;
+
+function parseEvents(raw){
+  return raw.trim().split("\n").map(function(line){
+    const t = Number(line.slice(0,10));
+    const type = line.slice(10).trim();
+    return { t: t, type: type };
+  }).sort(function(a,b){ return a.t - b.t; });
+}
+const SUN  = parseEvents(SUN_RAW);
+const MOON = parseEvents(MOON_RAW);
+
+/* ============================================================
+   几何常量：全部按 ini 的计算式推导，不改数值
+   SkinWidth 420 / SkinHeight 256 / IconSize 21 / Length 360 / OffsetValue 15
+   ============================================================ */
+const W = 420, H = 256;
+const IconSize = 21, Length = 360, OffsetValue = 15;
+const ContainerH = H - 14 - 39;            // 203
+const ContainerW = W - 20;                 // 400
+const ContainerX = (W/2 - ContainerW/2) - 1; // 9
+const ContainerY = H - 14 - ContainerH;    // 39
+const HorizonY = (ContainerH - 1) / 2;     // 101
+const XAxisStart = ContainerW / 2 - Length / 2; // 20
+const iconHalf = (IconSize + 1) / 2;       // 11
+const DayApexMid  = iconHalf + OffsetValue;       // 26
+const DayApexHigh = DayApexMid - OffsetValue;     // 11
+const DayApexLow  = DayApexMid + OffsetValue;     // 41
+const NightNadirMid  = (ContainerH - 1) - iconHalf - OffsetValue;      // 176
+const NightNadirHigh = NightNadirMid - OffsetValue;                    // 161
+const NightNadirLow  = NightNadirMid + OffsetValue;                    // 191
+const MaxYOffsetPerSecond = 7200 / OffsetValue;   // 480
+
+/* ============================================================
+   算法：Position Simulator.lua 的等价移植
+   ============================================================ */
+function nearest(events, now){
+  let prev = null, next = null, prevIdx = -1, nextIdx = -1;
+  for (let i = 0; i < events.length; i++){
+    if (events[i].t <= now){ prev = events[i]; prevIdx = i; }
+    if (events[i].t > now){ next = events[i]; nextIdx = i; break; }
+  }
+  return { prev: prev, next: next, prevIdx: prevIdx, nextIdx: nextIdx };
+}
+
+function findPrev(events, fromIndex, type){
+  for (let i = fromIndex - 1; i >= 0; i--) if (events[i].type === type) return events[i].t;
+  return null;
+}
+function findNext(events, fromIndex, type){
+  for (let i = fromIndex + 1; i < events.length; i++) if (events[i].type === type) return events[i].t;
+  return null;
+}
+
+// 四事件周期：返回 startTime / endTime 与四个事件时间
+function fourEvents(events, now, prefix){
+  const setType = prefix + "set";
+  const riseType = prefix + "rise";
+  const near = nearest(events, now);
+  if (!near.prev || !near.next) return null;
+
+  const cycle = {};
+  const mid = (near.prev.t + near.next.t) / 2;
+
+  if (near.prev.type === setType && near.next.type === riseType && now > mid){
+    cycle.first  = near.prev.t;
+    cycle.second = near.next.t;
+    cycle.third  = findNext(events, near.nextIdx, setType);
+    cycle.fourth = findNext(events, near.nextIdx, riseType);
+  } else if (near.prev.type === riseType && near.next.type === setType){
+    cycle.first  = findPrev(events, near.prevIdx, setType);
+    cycle.second = near.prev.t;
+    cycle.third  = near.next.t;
+    cycle.fourth = findNext(events, near.nextIdx, riseType);
+  } else if (near.prev.type === setType && near.next.type === riseType && now <= mid){
+    cycle.first  = findPrev(events, near.prevIdx, setType);
+    cycle.second = findPrev(events, near.prevIdx, riseType);
+    cycle.third  = near.prev.t;
+    cycle.fourth = near.next.t;
+  } else {
+    return null;
+  }
+
+  if (cycle.first != null && cycle.second != null) cycle.start = (cycle.first + cycle.second) / 2;
+  if (cycle.third != null && cycle.fourth != null) cycle.end = (cycle.third + cycle.fourth) / 2;
+  return cycle;
+}
+
+// 抛物线：可见 = 开口向下，不可见 = 开口向上
+function calculateY(now, prev, next, isSun){
+  const ratio = (now - prev.t) / (next.t - prev.t);
+  const above = isSun
+    ? (prev.type === "Sunrise" && next.type === "Sunset")
+    : (prev.type === "Moonrise" && next.type === "Moonset");
+
+  if (above){
+    if (isSun){
+      const span = next.t - prev.t;
+      const apexOffset = (span - 43200) / MaxYOffsetPerSecond;
+      const apex = clamp(DayApexMid - apexOffset, DayApexHigh, DayApexLow);
+      return HorizonY - (HorizonY - apex) * (1 - Math.pow(2 * ratio - 1, 2));
+    }
+    return HorizonY - (HorizonY - DayApexMid) * (1 - Math.pow(2 * ratio - 1, 2));
+  }
+  if (isSun){
+    const span = next.t - prev.t;
+    const nadirOffset = (span - 43200) / MaxYOffsetPerSecond;
+    const nadir = clamp(NightNadirMid + nadirOffset, NightNadirHigh, NightNadirLow);
+    return HorizonY + (nadir - HorizonY) * (1 - Math.pow(2 * ratio - 1, 2));
+  }
+  return HorizonY + (NightNadirMid - HorizonY) * (1 - Math.pow(2 * ratio - 1, 2));
+}
+
+function calculateState(now, prev, next){
+  const mid = (prev.t + next.t) / 2;
+  const visible = (prev.type === "Sunrise" && next.type === "Sunset") ||
+                  (prev.type === "Moonrise" && next.type === "Moonset");
+  const before = now < mid;
+  return visible ? (before ? "上升" : "下降") : (before ? "下降" : "上升");
+}
+
+function clamp(v, lo, hi){ return v < lo ? lo : (v > hi ? hi : v); }
+
+// 单个天体的完整解算：X 走周期比例，Y 走抛物线
+function solveBody(events, now, prefix, isSun){
+  const near = nearest(events, now);
+  const cycle = fourEvents(events, now, prefix);
+  const out = { x: XAxisStart, y: HorizonY, cycle: cycle, state: "—", rise: null, set: null, riseX: null, setX: null, ready: false, ratio: null };
+
+  if (cycle && cycle.start != null && cycle.end != null){
+    out.ready = true;
+    const ratio = clamp((now - cycle.start) / (cycle.end - cycle.start), 0, 1);
+    out.ratio = ratio;
+    out.x = XAxisStart + ratio * Length;
+    if (cycle.second != null && cycle.third != null){
+      out.rise = cycle.second;
+      out.set  = cycle.third;
+      out.riseX = XAxisStart + clamp((cycle.second - cycle.start) / (cycle.end - cycle.start), 0, 1) * Length;
+      out.setX  = XAxisStart + clamp((cycle.third  - cycle.start) / (cycle.end - cycle.start), 0, 1) * Length;
+    }
+  }
+  if (near.prev && near.next){
+    out.y = calculateY(now, near.prev, near.next, isSun);
+    out.state = calculateState(now, near.prev, near.next);
+  }
+  return out;
+}
+
+/* ============================================================
+   画布
+   ============================================================ */
+const stage = document.getElementById("stage");
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const tip = document.getElementById("tip");
+const dpr = Math.min(window.devicePixelRatio || 1, 3);
+cv.width = W * dpr;
+cv.height = H * dpr;
+ctx.scale(dpr, dpr);
+
+// 容器内坐标 -> 皮肤坐标
+const px = function(x){ return ContainerX + x; };
+const py = function(y){ return ContainerY + y; };
+
+function drawSun(x, y){
+  const r = 6.2, spikes = 8;
+  ctx.save();
+  ctx.translate(px(x), py(y));
+  ctx.fillStyle = "rgba(255,215,0,.95)";
+  ctx.beginPath();
+  for (let i = 0; i < spikes * 2; i++){
+    const ang = (Math.PI / spikes) * i - Math.PI / 2;
+    const rad = i % 2 === 0 ? 10 : 6.2;
+    const cx = Math.cos(ang) * rad, cy = Math.sin(ang) * rad;
+    if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = "#FFE558";
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawMoon(x, y){
+  ctx.save();
+  ctx.translate(px(x), py(y));
+  ctx.fillStyle = "rgba(30,144,255,.95)";
+  ctx.beginPath();
+  ctx.arc(0, 0, 7.4, 0, Math.PI * 2);
+  ctx.fill();
+  // 挖出月牙：透明挖孔，露出的是面板底色
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.arc(3.6, -1.2, 6.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawMark(x, color){
+  ctx.save();
+  ctx.translate(px(x), py(HorizonY));
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = color;
+  ctx.fillRect(-4, -4, 8, 8);
+  ctx.restore();
+}
+
+const hits = [];   // 供鼠标悬停提示
+
+function render(now){
+  ctx.clearRect(0, 0, W, H);
+  hits.length = 0;
+
+  // 标题（与皮肤同名，居顶）
+  ctx.save();
+  ctx.font = 'bold 15px "Trebuchet MS","Microsoft YaHei",sans-serif';
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  ctx.shadowColor = "rgba(0,0,0,.45)";
+  ctx.shadowBlur = 3;
+  ctx.fillText("SUN MOON TRACKER", W / 2, 26);
+  ctx.restore();
+
+  // 地平线
+  ctx.strokeStyle = "rgba(128,128,128,.5)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px(XAxisStart - (IconSize - 1) / 2), py(HorizonY) + 0.5);
+  ctx.lineTo(px(XAxisStart + Length + (IconSize - 1) / 2), py(HorizonY) + 0.5);
+  ctx.stroke();
+
+  const sun  = solveBody(SUN,  now, "Sun",  true);
+  const moon = solveBody(MOON, now, "Moon", false);
+
+  if (sun.riseX != null){
+    drawMark(sun.riseX, "rgba(255,215,0,.71)");
+    drawMark(sun.setX,  "rgba(255,215,0,.59)");
+  }
+  if (moon.riseX != null){
+    drawMark(moon.riseX, "rgba(30,144,255,.71)");
+    drawMark(moon.setX,  "rgba(30,144,255,.59)");
+  }
+
+  if (sun.ready) drawSun(sun.x, sun.y);
+  if (moon.ready) drawMoon(moon.x, moon.y);
+
+  if (sun.ready)  hits.push({ id:"sun",  x:px(sun.x),  y:py(sun.y),  d:sun  });
+  if (moon.ready) hits.push({ id:"moon", x:px(moon.x), y:py(moon.y), d:moon });
+
+  return { sun: sun, moon: moon };
+}
+
+/* ============================================================
+   时间控制
+   ============================================================ */
+const RAW_MIN = SUN[0].t + 60;
+// 右端停在最后一个「日落」之前：再往后数据不够凑齐四事件
+const RAW_MAX = SUN.filter(function(e){ return e.type === "Sunset"; }).pop().t - 60;
+
+// 两端再往里收：数据最前/最后那半天只有相邻两个事件，四事件周期算不全，
+// X 会退回轴首端，图标就贴着左边原地升降。这里一直收到「日月都能凑齐周期、
+// 且都已经走进轴内」为止，避免端点处出现贴边不动的画面。
+function insideAxis(t){
+  const s = solveBody(SUN, t, "Sun", true);
+  const m = solveBody(MOON, t, "Moon", false);
+  return s.ready && m.ready && s.ratio >= 0.1 && s.ratio <= 0.9 && m.ratio >= 0.1 && m.ratio <= 0.9;
+}
+let MIN_T = RAW_MIN;
+let MAX_T = RAW_MAX;
+while (MIN_T + 300 < MAX_T && !insideAxis(MIN_T)) MIN_T += 300;
+while (MAX_T - 300 > MIN_T && !insideAxis(MAX_T)) MAX_T -= 300;
+
+const state = { now: 0, playing: false, speed: 1800 };
+
+function fmtClock(sec){
+  const d = new Date(sec * 1000);
+  const pad = function(n){ return n < 10 ? "0" + n : "" + n; };
+  return (d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+function fmtHM(sec){
+  if (sec == null) return "—";
+  const d = new Date(sec * 1000);
+  const pad = function(n){ return n < 10 ? "0" + n : "" + n; };
+  return pad(d.getHours()) + ":" + pad(d.getMinutes());
+}
+
+const el = {
+  play: document.getElementById("play"),
+  now: document.getElementById("now"),
+  scrub: document.getElementById("scrub"),
+  clock: document.getElementById("clock"),
+  sunState: document.getElementById("sunState"),
+  sunRise: document.getElementById("sunRise"),
+  sunSet: document.getElementById("sunSet"),
+  moonState: document.getElementById("moonState"),
+  moonRise: document.getElementById("moonRise"),
+  moonSet: document.getElementById("moonSet")
+};
+
+el.scrub.min = MIN_T;
+el.scrub.max = MAX_T;
+el.scrub.step = 60;
+
+function paint(){
+  const r = render(state.now);
+  el.scrub.value = state.now;
+  el.clock.textContent = fmtClock(state.now);
+
+  el.sunState.textContent = r.sun.state;
+  el.sunRise.textContent  = fmtHM(r.sun.rise);
+  el.sunSet.textContent   = fmtHM(r.sun.set);
+  el.moonState.textContent = r.moon.state;
+  el.moonRise.textContent  = fmtHM(r.moon.rise);
+  el.moonSet.textContent   = fmtHM(r.moon.set);
+}
+
+let rafId = 0, prevTs = 0;
+function tick(ts){
+  if (!state.playing) return;
+  if (!prevTs) prevTs = ts;
+  const dt = (ts - prevTs) / 1000;
+  prevTs = ts;
+  state.now += dt * state.speed;
+  if (state.now > MAX_T) state.now = MIN_T;
+  paint();
+  rafId = requestAnimationFrame(tick);
+}
+
+el.play.addEventListener("click", function(){
+  state.playing = !state.playing;
+  el.play.textContent = state.playing ? "❚❚ 暂停" : "▶ 播放";
+  if (state.playing){ prevTs = 0; rafId = requestAnimationFrame(tick); }
+  else cancelAnimationFrame(rafId);
+});
+
+el.now.addEventListener("click", function(){
+  const real = Date.now() / 1000;
+  state.now = clamp(real, MIN_T, MAX_T);
+  paint();
+});
+
+el.scrub.addEventListener("input", function(){
+  state.playing = false;
+  el.play.textContent = "▶ 播放";
+  cancelAnimationFrame(rafId);
+  state.now = Number(el.scrub.value);
+  paint();
+});
+
+window.addEventListener("keydown", function(e){
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight"){
+    state.now = clamp(state.now + (e.key === "ArrowLeft" ? -600 : 600), MIN_T, MAX_T);
+    paint();
+  }
+});
+
+/* ============================================================
+   悬停提示（对应皮肤里 MouseOver 才显示的时间）
+   ============================================================ */
+cv.addEventListener("mousemove", function(e){
+  const rect = cv.getBoundingClientRect();
+  const scale = rect.width / W;
+  const lx = (e.clientX - rect.left) / scale;
+  const ly = (e.clientY - rect.top) / scale;
+
+  let hit = null;
+  for (const h of hits){
+    if (Math.hypot(lx - h.x, ly - h.y) <= 13){ hit = h; break; }
+  }
+  if (!hit){ tip.classList.remove("on"); return; }
+
+  const d = hit.d;
+  const name = hit.id === "sun" ? "太阳" : "月亮";
+  const line1 = d.rise != null ? (hit.id === "sun" ? "日出 " : "月出 ") + fmtHM(d.rise) : "数据不足";
+  const line2 = d.set != null ? (hit.id === "sun" ? "日落 " : "月落 ") + fmtHM(d.set) : "";
+  tip.innerHTML = "<b>" + name + "</b> · " + d.state + "<br>" + line1 + (line2 ? " · " + line2 : "");
+
+  const box = stage.getBoundingClientRect();
+  const scaleCss = box.width / W;
+  tip.style.left = (hit.x * scaleCss) + "px";
+  tip.style.top  = (hit.y * scaleCss) + "px";
+  tip.classList.add("on");
+});
+cv.addEventListener("mouseleave", function(){ tip.classList.remove("on"); });
+
+/* ============================================================
+   启动
+   ============================================================ */
+(function init(){
+  // ?t=<Unix秒> 可把画面定格在某一刻，方便截图或分享
+  const arg = new URLSearchParams(location.search).get("t");
+  const real = Date.now() / 1000;
+  state.now = arg ? clamp(Number(arg), MIN_T, MAX_T) : clamp(real, MIN_T, MAX_T);
+  paint();
+})();
+</script>
+</body>
+</html>
