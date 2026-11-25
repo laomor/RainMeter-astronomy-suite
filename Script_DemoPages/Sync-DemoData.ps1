@@ -16,10 +16,10 @@ $ErrorActionPreference = 'Stop'
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 $Pages = @(
-  'EffectPreviewImage_Position\index.html',
-  'EffectPreviewImage_Trajectory\index.html',
-  'EffectPreviewImage_Event\index.html',
-  'EffectPreviewImage_Clock\index.html'
+  'EffectPreviewImage_Position/index.html',
+  'EffectPreviewImage_Trajectory/index.html',
+  'EffectPreviewImage_Event/index.html',
+  'EffectPreviewImage_Clock/index.html'
 )
 
 function Read-EventLines {
@@ -60,8 +60,8 @@ function Set-Block {
   return $Text.Substring(0, $i) + $Block + $Text.Substring($j + $end.Length)
 }
 
-$sun  = Read-EventLines -Path (Join-Path $Root 'Event Time Case\SunTimeStampEvent.txt') -Kind SUN  -Allowed 'Sunrise|Sunset'
-$moon = Read-EventLines -Path (Join-Path $Root 'Event Time Case\MoonTimeStampEvent.txt') -Kind MOON -Allowed 'Moonrise|Moonset'
+$sun  = Read-EventLines -Path (Join-Path $Root 'Event Time Case/SunTimeStampEvent.txt')  -Kind SUN  -Allowed 'Sunrise|Sunset'
+$moon = Read-EventLines -Path (Join-Path $Root 'Event Time Case/MoonTimeStampEvent.txt') -Kind MOON -Allowed 'Moonrise|Moonset'
 
 if (-not $sun -or -not $moon) {
   Write-Host '::warning::事件数据不可用，本次不更新演示页，页面保持上一版数据'
