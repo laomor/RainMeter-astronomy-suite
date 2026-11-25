@@ -50,7 +50,7 @@
 </table>
 
 > 这里只放了几张图给你尝尝鲜，想看更多？去 `EffectPreviewImage_*/` 文件夹里自己翻吧。<br>
-> 顺带说个事：能搬走的是 Globe 和模拟天体位置的那两个效果，Clock 系列是我自己桌面上配着用的，没打算给别人移植——摆在这儿，是让你拿同一时刻的三张横着对照看。
+> 顺带说个事：能搬走的是 Globe 和模拟天体位置的那两个效果，[Clock](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Clock/) 系列是我自己桌面上配着用的，没打算给别人移植——摆在这儿，是让你拿同一时刻的三张横着对照看。
 
 ---
 
@@ -59,9 +59,9 @@
 | 视图 | 一句话说清楚 | 能解决你啥好奇 |
 |---|---|---|
 | **Globe** | 用 360 张地球图跟着时间走，让图转起来 | 想看“现在地球哪一块被照亮了” |
-| **Trajectory Viewer** | 画出太阳和月亮每天东升西落的轨迹 | 想看“今天这俩是怎么爬坡又怎么下坡的” |
-| **Event Tracker** | 把未来几次的升降时间点排出来 | 想看“接下来几次日出日落、月出月落都在啥时候” |
-| **Position Simulator** | 专门算好当前的周期，展示天体在天空的相对位置 | 想看“太阳/月亮现在到底飞在天空的哪一块” |
+| [**Trajectory Viewer**](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Trajectory/) | 画出太阳和月亮每天东升西落的轨迹 | 想看“今天这俩是怎么爬坡又怎么下坡的” |
+| [**Event Tracker**](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Event/) | 把未来几次的升降时间点排出来 | 想看“接下来几次日出日落、月出月落都在啥时候” |
+| [**Position Simulator**](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Position/) | 专门算好当前的周期，展示天体在天空的相对位置 | 想看“太阳/月亮现在到底飞在天空的哪一块” |
 
 这四个视图其实共用一个数据源，只是我用了不同的算法去“画”它们。
 
