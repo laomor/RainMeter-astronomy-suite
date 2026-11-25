@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Position Simulator · 位置模拟</title>
+<style>
+  :root{
+    --sun:#FFD700;
+    --moon:#1E90FF;
+    --ink:rgba(255,255,255,.92);
+    --ink-dim:rgba(255,255,255,.55);
+    --warn:#f0a13a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:#05070d;
+    background-image:radial-gradient(120% 90% at 50% 0%, #131c33 0%, #05070d 62%);
+    color:var(--ink);
+    font-family:"Trebuchet MS","Microsoft YaHei",system-ui,sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 18px;
+  }
+  .app{width:100%;max-width:660px;}
+  .head{display:flex;align-items:baseline;gap:10px;margin:0 4px 14px;}
+  .head h1{font-size:19px;margin:0;letter-spacing:.5px;}
+  .head span{font-size:12px;color:var(--ink-dim);letter-spacing:.5px;}
+
+  .stage{
+    position:relative;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.07);
+    background:linear-gradient(180deg,#121c33 0%,#0a1120 100%);
+    box-shadow:0 18px 40px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+    overflow:hidden;
+  }
+  canvas{display:block;width:100%;height:auto;}
+
+  .tip{
+    position:absolute;
+    transform:translate(-50%,-140%);
+    padding:6px 9px;
+    border-radius:7px;
+    background:rgba(8,12,22,.92);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:12px;
+    white-space:nowrap;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .15s;
+  }
+  .tip.on{opacity:1;}
+
+  .bar{
+    display:flex;align-items:center;gap:10px;
+    margin-top:16px;
+    padding:0 2px;
+  }
+  .btn{
+    appearance:none;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.05);
+    color:var(--ink);
+    border-radius:8px;
+    height:34px;
+    padding:0 13px;
+    font:inherit;font-size:13px;
+    cursor:pointer;
+  }
+  .btn:hover{background:rgba(255,255,255,.1);}
+  .btn.primary{min-width:74px;}
+
+  .scrub{
+    -webkit-appearance:none;appearance:none;
+    flex:1;height:4px;border-radius:2px;
+    background:rgba(255,255,255,.14);
+    outline:none;
+  }
+  .scrub::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--ink);border:none;cursor:pointer;
+    box-shadow:0 0 0 1px rgba(0,0,0,.5);
+  }
+  .scrub::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;background:var(--ink);
+    border:none;cursor:pointer;
+  }
+
+  .clock{
+    font-variant-numeric:tabular-nums;
+    font-size:13px;color:var(--ink-dim);
+    white-space:nowrap;min-width:104px;text-align:right;
+  }
+
+  .readout{
+    display:flex;gap:26px;flex-wrap:wrap;
+    margin:14px 2px 0;
+    font-size:12.5px;color:var(--ink-dim);
+  }
+  .readout b{color:var(--ink);font-weight:600;}
+  .readout i{font-style:normal;font-variant-numeric:tabular-nums;}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px;}
+
+  /* 观测点：两个输入框 + 来源标签。放在读数下面，和 index 的排布一致 */
+  .obs{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    margin:13px 2px 0;font-size:11.5px;color:var(--ink-dim);
+  }
+  .obs label{display:flex;align-items:center;gap:5px;}
+  .obs input{
+    width:68px;height:26px;padding:0 7px;
+    border:1px solid rgba(255,255,255,.12);border-radius:6px;
+    background:rgba(255,255,255,.05);color:var(--ink);
+    font:inherit;font-size:12px;text-align:right;
+    font-variant-numeric:tabular-nums;
+  }
+  .obs input:focus{
+    outline:none;
+    border-color:rgba(255,215,0,.45);
+    background:rgba(255,215,0,.07);
+  }
+  .obs-src{margin-left:auto;font-size:11px;color:rgba(255,255,255,.42);white-space:nowrap;}
+  .obs-src.warn{color:rgba(240,161,58,.8);}
+
+  .spd{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    margin:12px 2px 0;font-size:11px;color:rgba(255,255,255,.4);
+  }
+  .spd-b{
+    appearance:none;border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);
+    border-radius:6px;height:24px;padding:0 9px;
+    font:inherit;font-size:11px;cursor:pointer;
+    font-variant-numeric:tabular-nums;
+  }
+  .spd-b:hover{background:rgba(255,255,255,.1);}
+  .spd-b.on{
+    border-color:rgba(255,215,0,.5);color:#FFD700;
+    background:rgba(255,215,0,.09);
+  }
+  .note{
+    margin:18px 4px 0;font-size:11.5px;line-height:1.7;color:rgba(255,255,255,.38);
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="head">
+    <h1>位置模拟 · 观测点版</h1>
+    <span>POSITION SIMULATOR · 横轴按时算、纵轴按纬度算、升落解 h = 0（不含折射）</span>
+  </div>
+
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="tip" id="tip"></div>
+  </div>
+
+  <div class="bar">
+    <button class="btn primary" id="play">▶ 播放</button>
+    <button class="btn" id="now">现在</button>
+    <input class="scrub" id="scrub" type="range" min="0" max="1" step="60">
+    <span class="clock" id="clock"></span>
+  </div>
+  <div class="spd" id="spd">
+    <span>1 秒 =</span>
+    <button class="spd-b" data-s="2400" title="1 秒走 40 分钟">40 分</button>
+    <button class="spd-b" data-s="1800" title="1 秒走 30 分钟">30 分</button>
+    <button class="spd-b" data-s="1200" title="1 秒走 20 分钟">20 分</button>
+    <button class="spd-b" data-s="900" title="1 秒走 15 分钟">15 分</button>
+    <button class="spd-b" data-s="600" title="1 秒走 10 分钟">10 分</button>
+    <button class="spd-b" data-s="300" title="1 秒走 5 分钟">5 分</button>
+  </div>
+
+  <div class="readout">
+    <span><span class="dot" style="background:var(--sun)"></span>太阳 <b id="sunState">—</b><i id="sunA"></i><i id="sunB"></i></span>
+    <span><span class="dot" style="background:var(--moon)"></span>月亮 <b id="moonState">—</b><i id="moonA"></i><i id="moonB"></i></span>
+  </div>
+
+  <div class="obs">
+    <label>经度 <input id="inpLon" type="text" inputmode="decimal" spellcheck="false" autocomplete="off"></label>
+    <label>纬度 <input id="inpLat" type="text" inputmode="decimal" spellcheck="false" autocomplete="off"></label>
+    <span class="obs-src" id="obsSrc">—</span>
+  </div>
+
+  <div class="note">
+    横轴：天体正对头顶的那条经线，左 359° → 右 0°，往右走就是时间在流逝。纵轴：观测点看到的高度角。<br>
+    升落按几何地平线算（不扣折射、不扣视半径），比天文年历早/晚几分钟属正常。<br>
+    观测点优先级：手填 &gt; 自动定位 &gt; 默认北京。时间窗：打开页面时往前 2 天、往后 5 天。
+  </div>
+
+</div>
+
+<script>
+/* 本页不读事件文件：位置全靠星历算 */
+
+/* ============================================================
+   几何常量
+   SkinWidth 420 / SkinHeight 300 / IconSize 21 / Length 360
+   高度从 256 加到 300，纯粹是纵轴量程的需要：
+     赤道 + 春分那天太阳从 +90°（天顶）走到 −90°（天底），整整 180°；
+     1° = 1.2px 就是 216px，再加两边各 10px 的圆点半径 → 至少 236px 的画布高。
+     地平线放正中（上下同比例），取到 247 是为了两头各还剩 5~6px 余量。
+   ============================================================ */
+const W = 420, H = 300;
+const IconSize = 21, Length = 360;
+const LABEL_H = 14;                            // 底部留给轴标签（359° / 0°）的高度
+const TITLE_H = 39;                            // 顶部留给标题的高度
+const ContainerH = H - LABEL_H - TITLE_H;      // 247：画布区，真正画图的地方
+const ContainerW = W - 20;                     // 400
+const ContainerX = (W / 2 - ContainerW / 2) - 1; // 9
+const ContainerY = H - LABEL_H - ContainerH;   // 39：顶部留给标题，不随 H 变化
+const HorizonY = (ContainerH - 1) / 2;         // 123：地平线在正中
+const XAxisStart = ContainerW / 2 - Length / 2; // 20
+const edgePad = (IconSize - 1) / 2;            // 10：地平线两头各多画一点，和标记的宽对齐
+
+/* ============================================================
+   观测点：三档来源，优先级 手填 > 自动 > 默认
+   这里只存一份真值，下面的 elevation / 升落全部读它
+   ============================================================ */
+const DEFAULT_LAT = 39.90, DEFAULT_LON = 116.40;
+const OBSERVER = { lat: DEFAULT_LAT, lon: DEFAULT_LON, src: '默认' };
+let observerManual = false;   // 手填过就一直用手填的，自动定位不再顶掉它
+
+/* 地平线取 0° 几何地平：不扣折射、不扣视半径、月亮不扣地平视差。
+   升落就是"真实高度穿过 H0"那一刻，与 index 里 alt > 0 即白天同一口径。
+   ⚠ 改这个数要同步改两处说明（搜「同一口径」）：一处是本段，一处是底栏"升落"那段；
+     否则代码和注释会打架，下一个读的人会以为 H0 该改回 0。 */
+const H0 = 0;
+
+/* ============================================================
+   工具函数
+   ============================================================ */
+function clamp(v, lo, hi){ return v < lo ? lo : (v > hi ? hi : v); }
+// 注意：clamp 把 NaN 原样穿过去（两个比较都是 false）。这是故意的——
+//   把 NaN 换成 lo 会让"算错了"变成"看起来正常但位置是错的"，那种更难查。
+//   所以 NaN 必须在上游挡掉：经纬度走 Number.isFinite 判，高度角走 asinSafe 夹。
+
+// asin 的入参夹到 [−1, 1]。
+//   理论上 sin h 的表达式恒在范围内，但天顶/天底那一刻 sin²φ+cos²φ 在浮点里
+//   可能算成 1±1e-16，而 Math.asin(1+ε) 直接返回 NaN —— 那会让圆点凭空消失、
+//   面板全变成 NaN，而且一句错都不报。夹一下就没有这条路。
+//   注：asin 的输出天生锁在 [−90°, +90°]，所以"极昼极夜会不会超过 ±90"在数学上不可能；
+//   极昼只是把最低高度抬到 0 以上，极夜只是把最高高度压到 0 以下，两端互相靠拢，不会越界。
+function asinSafe(v){
+  if (!Number.isFinite(v)) return NaN;
+  return Math.asin(v < -1 ? -1 : (v > 1 ? 1 : v));
+}
+
+// 两位数补零：日期格式化的三处共用，别各写一份
+function pad2(n){ return n < 10 ? "0" + n : "" + n; }
+
+/* ============================================================
+   直射经度由星历直接算：λ = 天体赤经 − 格林尼治恒星时
+   （太阳、月亮同一套，升落时刻不参与）
+   X 轴：左 359° → 右 0°，1px = 1°
+   ============================================================ */
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const EPS = 23.4392911 * D2R;          // 黄赤交角
+
+function mod360(v){ return ((v % 360) + 360) % 360; }
+function jdOf(sec){ return sec / 86400 + 2440587.5; }        // Unix 秒 → 儒略日
+function centuryOf(jd){ return (jd - 2451545.0) / 36525; }
+function gmstDeg(jd){ return mod360(280.46061837 + 360.98564736629 * (jd - 2451545.0)); }
+
+/* 黄道 → 赤道。必须带黄纬 β：月亮 β 能到 ±5.3°，漏掉这一项赤经会错到 1.6°，
+   月出月落跟着差近十分钟；太阳 β ≈ 0，传 0 就是原来的样子 */
+function eclToRa(lamDeg, betDeg){
+  const l = lamDeg * D2R, b = (betDeg || 0) * D2R;
+  return mod360(Math.atan2(
+    Math.sin(l) * Math.cos(EPS) - Math.tan(b) * Math.sin(EPS),
+    Math.cos(l)) * R2D);
+}
+
+function sunLam(jd){
+  const T = centuryOf(jd);
+  const L0 = 280.46646 + 36000.76983 * T;
+  const M  = (357.52911 + 35999.05029 * T) * D2R;
+  const C  = (1.914602 - 0.004817 * T) * Math.sin(M)
+           + 0.019993 * Math.sin(2 * M)
+           + 0.000289 * Math.sin(3 * M);
+  return L0 + C;
+}
+function sunRa(jd){ return eclToRa(sunLam(jd), 0); }
+
+function moonEcl(jd){
+  const T  = centuryOf(jd);
+  const Lp = 218.3164477 + 481267.88123421 * T;
+  const D  = (297.8501921 + 445267.1114034 * T) * D2R;
+  const M  = (357.5291092 + 35999.0502909 * T) * D2R;
+  const Mp = (134.9633964 + 477198.8675055 * T) * D2R;
+  const F  = (93.2720950 + 483202.0175233 * T) * D2R;
+  const lam = Lp
+            + 6.289 * Math.sin(Mp)
+            + 1.274 * Math.sin(2 * D - Mp)
+            + 0.658 * Math.sin(2 * D)
+            + 0.214 * Math.sin(2 * Mp)
+            - 0.186 * Math.sin(M)
+            - 0.114 * Math.sin(2 * F);
+  // 黄纬：四项主项。第 4 项是 +0.173·sin(2D−F)（原来写成减号了），
+  //   第 5 项 2D−M′+F 一并补上，凑够 0.2° 以内的量级
+  const bet = 5.128 * Math.sin(F)
+            + 0.281 * Math.sin(Mp + F)
+            + 0.278 * Math.sin(Mp - F)
+            + 0.173 * Math.sin(2 * D - F)
+            + 0.055 * Math.sin(2 * D - Mp + F);
+  return { lam: lam, bet: bet };
+}
+// 赤经、赤纬必须用同一份 β，否则赤经赤纬就不是同一个点了
+function moonRa(jd){ const e = moonEcl(jd); return eclToRa(e.lam, e.bet); }
+
+// 直射经度：赤经减格林尼治恒星时，就是它当头的那条经线
+function bodyLon(t, isSun){
+  const jd = jdOf(t);
+  return mod360((isSun ? sunRa(jd) : moonRa(jd)) - gmstDeg(jd));
+}
+
+// 左 359° → 右 0°
+function lonPx(lon){ return mod360(359 - lon); }
+
+/* ============================================================
+   观测点：X 不含纬度，Y 必须含——没有观测点就没有高度角
+   经纬度取自 OBSERVER，改位置不用重启，重画一帧即可
+   ============================================================ */
+const PX_PER_DEG = 1.2;        // 1° 高度 = 1.2px，地平线上下同比例
+
+function decOf(jd, isSun){
+  if (isSun) return asinSafe(Math.sin(EPS) * Math.sin(sunLam(jd) * D2R)) * R2D;
+  const e = moonEcl(jd);
+  const lam = e.lam * D2R, bet = e.bet * D2R;
+  return asinSafe(Math.sin(bet) * Math.cos(EPS)
+                + Math.cos(bet) * Math.sin(EPS) * Math.sin(lam)) * R2D;
+}
+
+// 高度角：sin h = sinφ·sinδ + cosφ·cosδ·cosH，H 是本地时角
+function altitude(t, isSun){
+  const jd = jdOf(t);
+  const dec = decOf(jd, isSun) * D2R;
+  const H = (gmstDeg(jd) + OBSERVER.lon - (isSun ? sunRa(jd) : moonRa(jd))) * D2R;
+  const phi = OBSERVER.lat * D2R;
+  return asinSafe(Math.sin(phi) * Math.sin(dec)
+                + Math.cos(phi) * Math.cos(dec) * Math.cos(H)) * R2D;
+}
+
+// 高度角 → 画布区内的 y。虽然是像素映射，但它是 solveBody 直接产出的一步（out.y），
+//   和 altitude 一起构成"高度角 → 位置"这条链，所以留在这里而不是挪去画布段。
+function yOfAltitude(h){
+  return clamp(HorizonY - h * PX_PER_DEG, 6, ContainerH - 8);
+}
+
+// 解 h(t) = 地平线：从 from 按 dir 扫，命中想要的升高/降低方向后二分收敛
+function findCross(isSun, from, dir, wantRising){
+  let t = from, s = altitude(t, isSun) - H0;
+  for (let i = 0; i < 200; i++){
+    const t2 = t + 600 * dir;
+    const s2 = altitude(t2, isSun) - H0;
+    if (s * s2 <= 0){
+      let a = t, b = t2, sa = s;
+      for (let k = 0; k < 18; k++){
+        const m = (a + b) / 2, sm = altitude(m, isSun) - H0;
+        if (sa * sm <= 0) b = m; else { a = m; sa = sm; }
+      }
+      // 扫描方向决定判据：向前扫时 s2 更晚，向后扫时 s2 更早
+      const goingUp = (dir > 0) ? (s2 > s) : (s2 < s);
+      if (goingUp === wantRising) return (a + b) / 2;
+      t = t2; s = s2;
+      continue;
+    }
+    t = t2; s = s2;
+  }
+  return null;
+}
+
+// 本轮的起点：λ 从 0 附近跳回 360 的瞬间 —— 也就是圆点从右端滑出、左端滑入那一刻。
+//   一轮的升落就按这个起点算，于是读数只在"越过终点"这一下变化；
+//   不再在"日落月落"和"过零点"两个跟画面无关的地方各变一次。
+//   做法：往回找 λ 那一跳（往回走 λ 本该增大，猛地掉下来就是跨过了接缝），再二分收敛
+function seamBefore(t, isSun){
+  let a = t, lamA = bodyLon(a, isSun);
+  for (let i = 0; i < 200; i++){
+    const b = a - 1800, lamB = bodyLon(b, isSun);
+    if (lamB < lamA - 180){          // 往回跨过了接缝
+      let lo = b, hi = a;            // lo 在接缝之前（λ≈0+），hi 在之后（λ≈360−）
+      for (let k = 0; k < 26; k++){
+        const m = (lo + hi) / 2;
+        if (bodyLon(m, isSun) < 180) lo = m; else hi = m;
+      }
+      // 取整到秒：二分残差在亚毫秒级，不取整的话"同一轮"里重算会差出几毫秒，
+      //   读数虽然看不出，但缓存键和逐帧比较会跟着抖
+      return Math.round((lo + hi) / 2);
+    }
+    a = b; lamA = lamB;
+  }
+  return null;
+}
+
+// 升落是解出来的，不是查出来的，按"这一轮"算：从圆点越过终点（接缝）那一刻起，
+//   一轮之内必有一次升起、一次落下，取各自的第一次。
+//   注意不要预设"日出在前"：观测点经度接近 0° 时接缝正好落在中天，
+//   那一刻的一轮是从正午到正午，于是日落在前、次日日出在后。谁在前由 X 轴决定，见 solveBody。
+//   缓存键取"接缝落在哪个小时"：它只在新一轮开始那一刻变，不会把跃变推到整点上跟画面错开
+const riseSetCache = { sun: null, moon: null };
+function riseSet(isSun, now){
+  const seam = seamBefore(now, isSun);
+  const key = Math.floor((seam == null ? now : seam) / 3600)
+            + '|' + OBSERVER.lat + '|' + OBSERVER.lon + '|' + (isSun ? 's' : 'm');
+  const c = isSun ? riseSetCache.sun : riseSetCache.moon;
+  if (c && c.key === key) return c;
+
+  let rise = null, set = null;
+  if (seam != null){
+    rise = findCross(isSun, seam, 1, true);
+    set  = findCross(isSun, seam, 1, false);
+  }
+  const out = { key: key, rise: rise, set: set, seam: seam };
+  if (isSun) riseSetCache.sun = out; else riseSetCache.moon = out;
+  return out;
+}
+
+// 单个天体的完整解算：X = 直射经度，Y = 真高度角，升落由 h = 0 解出
+function solveBody(now, isSun){
+  const lon = bodyLon(now, isSun);
+  const alt = altitude(now, isSun);
+  const rs  = riseSet(isSun, now);
+
+  const out = {
+    lon: lon,
+    x: XAxisStart + lonPx(lon),
+    y: yOfAltitude(alt),
+    alt: alt,
+    state: alt > altitude(now - 120, isSun) ? "上升" : "下降",
+    rise: rs.rise,
+    set: rs.set,
+    riseX: null,
+    setX: null,
+    riseFirst: true,
+    isSun: isSun              // 极昼极夜要用它选措辞（太阳才叫极昼/极夜）
+  };
+
+  if (out.rise != null) out.riseX = XAxisStart + lonPx(bodyLon(out.rise, isSun));
+  if (out.set  != null) out.setX  = XAxisStart + lonPx(bodyLon(out.set,  isSun));
+
+  // 读数按 X 轴的先后输出：本轮之内 x 随时间单调增，所以"谁靠左"就等于"谁先到"。
+  //   日落在前也行、日出在前也行，不预设哪个是第一个。
+  out.riseFirst = (out.rise == null) ? false
+                : (out.set  == null) ? true
+                : out.rise < out.set;
+  return out;
+}
+
+/* ============================================================
+   画布
+   ============================================================ */
+const stage = document.getElementById("stage");
+const cv = document.getElementById("cv");
+const ctx = cv.getContext("2d");
+const tip = document.getElementById("tip");
+/* 位图密度跟着"实际显示宽度"走。
+   CSS 把画布拉伸到容器宽（约 658px），若位图仍按 420 建，字和 1px 线都是插值放大的。
+   这里按"皮肤→设备"的真实倍率建位图；绘制坐标仍是 420×300 皮肤坐标，绘制函数一行都不用改。
+   注意三点（都踩过）：
+     1. dpr 必须在函数内每次重读——窗口拖到另一块不同缩放的屏上会变；
+     2. 用 setTransform 而不是 scale——改 cv.width 会重置整个上下文状态；
+     3. 这里不含 paint()。启动那次由 init() 统一画一帧，否则同一帧会算两遍 solveBody。 */
+function sizeCanvas(){
+  const dpr  = Math.min(window.devicePixelRatio || 1, 3);
+  const cssW = stage.clientWidth || W;              // 画布实际显示多宽
+  const s    = Math.min((cssW / W) * dpr, 4);       // 皮肤像素 → 设备像素，总倍率封顶
+  cv.width  = Math.round(W * s);
+  cv.height = Math.round(H * s);
+  ctx.setTransform(s, 0, 0, s, 0, 0);
+}
+
+// 容器内坐标 -> 皮肤坐标
+const px = function(x){ return ContainerX + x; };
+const py = function(y){ return ContainerY + y; };
+
+// 三个绘制原语都按「画布坐标」收参：外层要能把同一个点平移到 ±360px 的副本位置上
+function drawSunAt(X, Y){
+  const r = 6.2, spikes = 8;
+  ctx.save();
+  ctx.translate(X, Y);
+  ctx.fillStyle = "rgba(255,215,0,.95)";
+  ctx.beginPath();
+  for (let i = 0; i < spikes * 2; i++){
+    const ang = (Math.PI / spikes) * i - Math.PI / 2;
+    const rad = i % 2 === 0 ? 10 : 6.2;
+    const cx = Math.cos(ang) * rad, cy = Math.sin(ang) * rad;
+    if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = "#FFE558";
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawMoonAt(X, Y){
+  ctx.save();
+  ctx.translate(X, Y);
+  // 月牙：先把笔裁在圆内，再在圆内挖缺口。
+  //   原来的 destination-out 是"在整张画布上挖洞"，月亮飘过地平线时会把地平线一起啃缺
+  ctx.beginPath();
+  ctx.arc(0, 0, 7.4, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.fillStyle = "rgba(30,144,255,.95)";
+  ctx.fillRect(-8, -8, 16, 16);
+  ctx.globalCompositeOperation = "destination-out";
+  ctx.beginPath();
+  ctx.arc(3.6, -1.2, 6.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/* 环形横轴的跨界画法。
+   359° 与 0° 在几何上是邻居，可画面上隔着 360px。所以把圆点按一个周期画三份
+   （左副本 / 本体 / 右副本），并裁在轴的两端之内：
+     跨接缝那一刻，右端露出左半边、左端露出右半边，两块拼起来正好是整个圆点；
+     再走一步，比例就从 1/2+1/2 变成 3/4+1/4 —— 是"滑过去"，不是"跳过去"。
+   注意裁剪线取在轴的两端（XAxisStart 与 XAxisStart+Length），不是整块画板，
+   这样两端的半个点才拼得严丝合缝，也不会和地平线两头的延长段打架。 */
+function drawWrapped(xLocal, yLocal, drawAt){
+  const X = px(xLocal), Y = py(yLocal);
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(px(XAxisStart), 0, Length, H);   // 注意走 px()：XAxisStart 是局部坐标
+  ctx.clip();
+  for (let k = -1; k <= 1; k++) drawAt(X + k * Length, Y);
+  ctx.restore();
+}
+
+// 升落菱形：故意不裁剪。菱形半对角 5.66px，轴端在 px(20)=29、地平线延到 px(10)=19、
+//   容器边界 px(0)=9，所以贴边的菱形最多探出轴端 5.66px，仍落在地平线的延长段之内，
+//   不会看起来"飘在轴外面"。裁了反而会切掉贴边菱形的一角，更难看的失败模式。
+function drawMark(x, color){
+  ctx.save();
+  ctx.translate(px(x), py(HorizonY));
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = color;
+  ctx.fillRect(-4, -4, 8, 8);
+  ctx.restore();
+}
+
+const hits = [];   // 供鼠标悬停提示
+
+function render(now){
+  ctx.clearRect(0, 0, W, H);
+  hits.length = 0;
+
+  // 标题（与皮肤同名，居顶）
+  ctx.save();
+  ctx.font = 'bold 15px "Trebuchet MS","Microsoft YaHei",sans-serif';
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(255,255,255,.92)";
+  ctx.shadowColor = "rgba(0,0,0,.45)";
+  ctx.shadowBlur = 3;
+  ctx.fillText("SUN MOON TRACKER", W / 2, 26);
+  ctx.restore();
+
+  // 地平线
+  ctx.strokeStyle = "rgba(128,128,128,.5)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(px(XAxisStart - edgePad), py(HorizonY) + 0.5);
+  ctx.lineTo(px(XAxisStart + Length + edgePad), py(HorizonY) + 0.5);
+  ctx.stroke();
+
+  const sun  = solveBody(now, true);
+  const moon = solveBody(now, false);
+
+  // 升落标记：两端的 null 各判各的。
+  //   原来只判了 riseX，setX 为 null 时 px(null) 会算出 9，在左边缘冒出个假菱形
+  if (sun.riseX != null) drawMark(sun.riseX, "rgba(255,215,0,.71)");
+  if (sun.setX  != null) drawMark(sun.setX,  "rgba(255,215,0,.59)");
+  if (moon.riseX != null) drawMark(moon.riseX, "rgba(30,144,255,.71)");
+  if (moon.setX  != null) drawMark(moon.setX,  "rgba(30,144,255,.59)");
+
+  drawWrapped(sun.x, sun.y, drawSunAt);
+  drawWrapped(moon.x, moon.y, drawMoonAt);
+
+  // 命中区跟着画法走：接缝处圆点被分成两段，两段都要能悬停
+  for (const k of [-1, 0, 1]){
+    hits.push({ id:"sun",  x:px(sun.x)  + k * Length, y:py(sun.y),  d:sun  });
+    hits.push({ id:"moon", x:px(moon.x) + k * Length, y:py(moon.y), d:moon });
+  }
+
+  // 轴两端：左 359°、右 0°
+  ctx.save();
+  ctx.font = 'bold 8px "Trebuchet MS","Microsoft YaHei",sans-serif';
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(255,255,255,.63)";
+  ctx.fillText("359°", px(XAxisStart), py(ContainerH - 10));
+  ctx.fillText("0°",   px(XAxisStart + Length), py(ContainerH - 10));
+  ctx.restore();
+
+  return { sun: sun, moon: moon };
+}
+
+/* ============================================================
+   时间控制
+   窗口以"打开页面的那一刻"为基准：往前 2 天、往后 5 天。
+   星历本身没有边界，所以窗口只是拖动条的行程，不再钉死在某个月份
+   ============================================================ */
+const T_OPEN = Math.floor(Date.now() / 1000);
+const MIN_T = T_OPEN - 2 * 86400;
+const MAX_T = T_OPEN + 5 * 86400;
+
+const state = { now: 0, playing: false, speed: 1800 };
+
+function fmtClock(sec){
+  const d = new Date(sec * 1000);
+  return (d.getMonth() + 1) + "-" + pad2(d.getDate()) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+}
+// 读数分两处变，而且两处都是"看得见的事件"：
+//   ① 越过接缝（终点）—— 时刻本身换成下一天的同一次，由 riseSet 负责；
+//   ② 跨过零点        —— "昨日/明日"这类前缀翻篇，由这里负责。
+// 前缀只能相对"现在"算，所以它必然在午夜翻。这不是 bug，是"今天/明天"这件事本身的性质：
+//   同一个 07:15，23:59 时叫"明日 07:15"，00:01 时就叫"07:15"，说的都是那一件事。
+function fmtHM(sec, ref){
+  if (sec == null) return "—";
+  const d = new Date(sec * 1000);
+  const hm = pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+  if (ref == null) return hm;
+  const r = new Date(ref * 1000);
+  const dayOf = function(o){ return Date.UTC(o.getFullYear(), o.getMonth(), o.getDate()) / 86400000; };
+  const off = dayOf(d) - dayOf(r);
+  if (off === 0) return hm;
+  if (off === 1) return "明日 " + hm;
+  if (off === -1) return "昨日 " + hm;
+  return (d.getMonth() + 1) + "/" + d.getDate() + " " + hm;   // 再远就直接写月日
+}
+// 悬停提示一律给完整月日，不省略，省得再去数"昨日"到底指哪天
+function fmtFull(sec){
+  if (sec == null) return "—";
+  const d = new Date(sec * 1000);
+  return (d.getMonth() + 1) + "/" + d.getDate() + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+}
+
+const el = {
+  play: document.getElementById("play"),
+  now: document.getElementById("now"),
+  scrub: document.getElementById("scrub"),
+  clock: document.getElementById("clock"),
+  sunState: document.getElementById("sunState"),
+  sunA: document.getElementById("sunA"),
+  sunB: document.getElementById("sunB"),
+  moonState: document.getElementById("moonState"),
+  moonA: document.getElementById("moonA"),
+  moonB: document.getElementById("moonB"),
+  inpLon: document.getElementById("inpLon"),
+  inpLat: document.getElementById("inpLat"),
+  obsSrc: document.getElementById("obsSrc")
+};
+
+el.scrub.min = MIN_T;
+el.scrub.max = MAX_T;
+el.scrub.step = 60;
+
+// 整轮一个升落都没有（极昼极夜）：这两个事件本来就不存在，别摆两个破折号，
+//   直接说清楚怎么回事，比"日出 —"有用得多。太阳才叫极昼/极夜，月亮就照实说。
+//   判据用 H0 而不是 0：既然一整轮都没穿过 H0，当前高度必然恒在同一侧，所以这样判是准的；
+//   而用写死的 0 会和 findCross 的阈值脱钩（H0 一旦改成 −0.833 就会自相矛盾）。
+//   兜底：seam == null（回扫 100 小时都没找到接缝）时 rise/set 也会是 null，
+//   会走到这里按当前高度说话——这是异常路径的降级表现，不是正常语义。
+function riseSetNote(b){
+  if (b.rise != null || b.set != null) return null;
+  const up = b.alt > H0;
+  if (b.isSun) return up ? "极昼（整天不落）" : "极夜（整天不出）";
+  return up ? "整天不落" : "整天不出";
+}
+
+// 本轮的两个升落事件，按 X 轴先后排好：标记靠左的那个在前，标签跟着一起换位。
+//   读数用时分、悬停提示用月日，所以这里只交回 {label, t}，格式交给各自的调用方。
+//   两处共用这一个函数——顺序只有一份定义，不会改了一处漏掉另一处。
+function orderedEvents(b, labelRise, labelSet){
+  const first  = b.riseFirst ? [labelRise, b.rise] : [labelSet, b.set];
+  const second = b.riseFirst ? [labelSet, b.set]   : [labelRise, b.rise];
+  return [{ label: first[0], t: first[1] }, { label: second[0], t: second[1] }];
+}
+
+function paintPair(b, elA, elB, labelRise, labelSet, ref){
+  // 分隔符写进槽位里：这样某个槽位为空时不会留下孤零零一个"·"
+  const note = riseSetNote(b);
+  if (note){
+    elA.textContent = ' · ' + note;
+    elB.textContent = '';
+    return;
+  }
+  const e = orderedEvents(b, labelRise, labelSet);
+  elA.textContent = ' · ' + e[0].label + ' ' + fmtHM(e[0].t, ref);
+  elB.textContent = ' · ' + e[1].label + ' ' + fmtHM(e[1].t, ref);
+}
+
+function paint(){
+  const r = render(state.now);
+  el.scrub.value = state.now;
+  el.clock.textContent = fmtClock(state.now);
+
+  el.sunState.textContent = r.sun.state;
+  el.moonState.textContent = r.moon.state;
+  paintPair(r.sun,  el.sunA,  el.sunB,  '日出', '日落', state.now);
+  paintPair(r.moon, el.moonA, el.moonB, '月出', '月落', state.now);
+}
+
+/* ============================================================
+   观测点：默认 → 自动 → 手填
+   三档都落在同一个 applyObserverLocation 上，谁也不会各算一遍
+   ============================================================ */
+function fmtCoord(v){ return String(Math.round(v * 1e4) / 1e4); }
+
+function setObsSource(src, fallback){
+  el.obsSrc.textContent = src;
+  el.obsSrc.classList.toggle("warn", !!fallback);
+}
+
+function syncObsInputs(){
+  el.inpLon.value = fmtCoord(OBSERVER.lon);
+  el.inpLat.value = fmtCoord(OBSERVER.lat);
+}
+
+function applyObserverLocation(lat, lon, src){
+  OBSERVER.lat = lat;
+  OBSERVER.lon = lon;
+  OBSERVER.src = src;
+  syncObsInputs();
+  setObsSource(src, src === '默认');
+  paint();          // 经纬度一换，高度角和升落全变，立刻重画一帧
+}
+
+// 手填：回车或点别处就生效。**任一个**框不是数字就整条忽略（两个都不动）；
+//   都是数字则各自夹到范围内（纬度 ±90、经度 ±180）后一起生效。
+function applyManualObserver(){
+  const lon = parseFloat(el.inpLon.value);
+  const lat = parseFloat(el.inpLat.value);
+  if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;   // 填坏了就保持原位置，不报错
+  observerManual = true;
+  applyObserverLocation(clamp(lat, -90, 90), clamp(lon, -180, 180), '手填');
+}
+el.inpLon.addEventListener("change", applyManualObserver);
+el.inpLat.addEventListener("change", applyManualObserver);
+
+// 自动定位：向公开的 IP 归属地服务问一次，3 秒问不到就换下一个、全失败就留在默认
+//   离线、被浏览器拦、返回格式不对，都只是"继续用现在的位置"，不会把页面挂住
+function fetchJSON(url, ms){
+  const ctl = new AbortController();
+  const timer = setTimeout(function(){ ctl.abort(); }, ms);
+  return fetch(url, { signal: ctl.signal, cache: "no-store" })
+    .then(function(r){ return r.json(); })
+    .catch(function(){ return null; })
+    .then(function(d){ clearTimeout(timer); return d; });
+}
+
+function locateByIP(){
+  if (observerManual) return;
+  setObsSource("自动定位中…", false);
+
+  const urls = ["https://ipwho.is/", "https://ipapi.co/json/"];
+  const tryNext = function(i){
+    if (i >= urls.length){
+      if (!observerManual) setObsSource("默认（自动定位未成功）", true);
+      return;
+    }
+    if (observerManual) return;
+    fetchJSON(urls[i], 3000).then(function(d){
+      const lat = d ? Number(d.latitude) : NaN;
+      const lon = d ? Number(d.longitude) : NaN;
+      const refused = !d || d.success === false || d.error === true;
+      const ok = !refused
+              && Number.isFinite(lat) && Number.isFinite(lon)
+              && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+      if (!ok){ tryNext(i + 1); return; }
+      if (observerManual) return;                       // 这期间你手填了，就让给你
+      applyObserverLocation(lat, lon, d.city ? "自动 · " + d.city : "自动");
+    });
+  };
+  tryNext(0);
+}
+
+/* ============================================================
+   交互：播放 / 拖动 / 变速 / 键盘 / 悬停
+   ============================================================ */
+let rafId = 0, prevTs = 0;
+function tick(ts){
+  if (!state.playing) return;
+  if (!prevTs) prevTs = ts;
+  const dt = (ts - prevTs) / 1000;
+  prevTs = ts;
+  state.now += dt * state.speed;
+  if (state.now > MAX_T) state.now = MIN_T;
+  paint();
+  rafId = requestAnimationFrame(tick);
+}
+
+el.play.addEventListener("click", function(){
+  state.playing = !state.playing;
+  el.play.textContent = state.playing ? "❚❚ 暂停" : "▶ 播放";
+  if (state.playing){ prevTs = 0; rafId = requestAnimationFrame(tick); }
+  else cancelAnimationFrame(rafId);
+});
+
+el.now.addEventListener("click", function(){
+  state.now = clamp(Date.now() / 1000, MIN_T, MAX_T);
+  paint();
+});
+
+el.scrub.addEventListener("input", function(){
+  state.playing = false;
+  el.play.textContent = "▶ 播放";
+  cancelAnimationFrame(rafId);
+  state.now = Number(el.scrub.value);
+  paint();
+});
+
+/* 播放速度：1 秒屏幕对应多少分钟数据，数值越小越慢 */
+const speedBtns = document.querySelectorAll(".spd-b");
+function markSpeed(){
+  for (let i = 0; i < speedBtns.length; i++){
+    speedBtns[i].classList.toggle("on",
+      Number(speedBtns[i].dataset.s) === state.speed);
+  }
+}
+for (let i = 0; i < speedBtns.length; i++){
+  speedBtns[i].addEventListener("click", function(){
+    state.speed = Number(this.dataset.s);
+    prevTs = 0;          // 改速度后重算帧间隔，免得第一帧跳一大步
+    markSpeed();
+  });
+}
+markSpeed();
+
+window.addEventListener("keydown", function(e){
+  // 焦点在输入框里时不要抢左右键：那是用来移光标的，不是用来拖时间的。
+  //   e.target 可能是 document（没有 closest），所以先判方法在不在
+  if (e.target && e.target.closest && e.target.closest("input,textarea")) return;
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight"){
+    state.now = clamp(state.now + (e.key === "ArrowLeft" ? -600 : 600), MIN_T, MAX_T);
+    paint();
+  }
+});
+
+/* 悬停提示（对应皮肤里 MouseOver 才显示的时间） */
+cv.addEventListener("mousemove", function(e){
+  const rect = cv.getBoundingClientRect();
+  const scale = rect.width / W;
+  const lx = (e.clientX - rect.left) / scale;
+  const ly = (e.clientY - rect.top) / scale;
+
+  let hit = null;
+  for (const h of hits){
+    if (Math.hypot(lx - h.x, ly - h.y) <= 13){ hit = h; break; }
+  }
+  if (!hit){ tip.classList.remove("on"); return; }
+
+  const d = hit.d;
+  const isSun = hit.id === "sun";
+  const name = isSun ? "太阳" : "月亮";
+  // 提示里的升落也走同一套：有事件就按 X 轴先后列，一个都没有就说明原因
+  const note = riseSetNote(d);
+  const evs = note ? [note]
+    : orderedEvents(d, isSun ? "日出" : "月出", isSun ? "日落" : "月落")
+        .filter(function(e){ return e.t != null; })
+        .map(function(e){ return e.label + ' ' + fmtFull(e.t); });
+  const line1 = evs.length ? evs.join(' · ') : "—";
+  const line3 = "高度 " + d.alt.toFixed(1) + "° · 直射 " + Math.round(d.lon) + "°";
+  tip.innerHTML = "<b>" + name + "</b> · " + d.state + "<br>" + line1 + "<br>" + line3;
+
+  const box = stage.getBoundingClientRect();
+  const scaleCss = box.width / W;
+  tip.style.left = (hit.x * scaleCss) + "px";
+  tip.style.top  = (hit.y * scaleCss) + "px";
+  tip.classList.add("on");
+});
+cv.addEventListener("mouseleave", function(){ tip.classList.remove("on"); });
+
+/* ============================================================
+   启动
+   ============================================================ */
+(function init(){
+  syncObsInputs();
+  setObsSource("默认", true);
+
+  // ?t=<Unix秒> 可把画面定格在某一刻，方便截图或分享；写坏了就退回"现在"
+  const arg = new URLSearchParams(location.search).get("t");
+  const t = arg === null ? NaN : Number(arg);
+  state.now = clamp(Number.isFinite(t) ? t : Date.now() / 1000, MIN_T, MAX_T);
+
+  sizeCanvas();   // 先按实际显示宽度定好位图，再画这一帧（只画一次）
+  paint();
+
+  locateByIP();   // 后台问一次；问到就换，问不到就留在默认
+})();
+
+// 窗口尺寸变化：位图密度和显示宽度都得重定，否则换屏或拉伸后会发虚、错位
+window.addEventListener("resize", function(){
+  sizeCanvas();
+  paint();
+});
+
+/* ============================================================
+   自检：按 F12 打开控制台能看到这几行。全部是可手算核对的量，
+   不依赖任何外部数据表；不想看可以整段删掉
+   ============================================================ */
+(function selfCheck(){
+  const sunJune = jdOf(Date.UTC(2026, 5, 21, 12) / 1000);
+  const sunDec  = jdOf(Date.UTC(2026, 11, 21, 12) / 1000);
+  console.info("[自检] GMST @ J2000 = " + gmstDeg(2451545.0).toFixed(4) + "°（应 ≈ 280.4606）");
+  console.info("[自检] 夏至太阳赤纬 = " + decOf(sunJune, true).toFixed(3) + "°（应 ≈ +23.44）");
+  console.info("[自检] 冬至太阳赤纬 = " + decOf(sunDec, true).toFixed(3) + "°（应 ≈ −23.44）");
+
+  // 恒等式：λ = 赤经 − 恒星时 时，本地时角 OBS − λ 必须等于 gmst + OBS − 赤经
+  const t = Date.now() / 1000, jd = jdOf(t);
+  const H1 = mod360(gmstDeg(jd) + OBSERVER.lon - sunRa(jd));
+  const H2 = mod360(OBSERVER.lon - bodyLon(t, true));
+  const dH = Math.abs(mod360(H1 - H2 + 180) - 180);
+  console.info("[自检] 时角两种算法的差 = " + dH.toExponential(2) + "°（应 ≈ 0）");
+})();
+</script>
+</body>
+</html>
