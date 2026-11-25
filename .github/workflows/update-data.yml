@@ -43,14 +43,21 @@ jobs:
         run: |
           git checkout "Users Public Documents/AstronomicalEvents.ps1"
 
+      # 把刚生成的 txt 灌进四个演示页的数据块（标记之间整段替换）
+      - name: Sync data into demo pages
+        shell: pwsh
+        run: |
+          ./"Script_DemoPages/Sync-DemoData.ps1"
+
       # 【关键修复】使用原生 Git 提交，只提交 txt 文件，忽略不存在的日志文件
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 只添加 Event Time Case 下的 txt 文件
+          # 只添加 Event Time Case 下的 txt，以及四个演示页
           git add "Event Time Case/*.txt"
+          git add "EffectPreviewImage_Position/index.html" "EffectPreviewImage_Trajectory/index.html" "EffectPreviewImage_Event/index.html" "EffectPreviewImage_Clock/index.html"
           
           # 如果文件有变化就提交，没变化就静默跳过，防止报错
           git commit -m "chore: auto-update sun & moon data" || echo "No changes to commit"
