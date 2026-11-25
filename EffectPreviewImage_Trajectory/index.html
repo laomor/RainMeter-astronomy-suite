@@ -145,15 +145,17 @@
   </div>
   <div class="spd" id="spd">
     <span>1 秒 =</span>
+    <button class="spd-b" data-s="2400" title="1 秒走 40 分钟">40 分</button>
     <button class="spd-b" data-s="1800" title="1 秒走 30 分钟">30 分</button>
+    <button class="spd-b" data-s="1200" title="1 秒走 20 分钟">20 分</button>
     <button class="spd-b" data-s="900" title="1 秒走 15 分钟">15 分</button>
     <button class="spd-b" data-s="600" title="1 秒走 10 分钟">10 分</button>
     <button class="spd-b" data-s="300" title="1 秒走 5 分钟">5 分</button>
   </div>
 
   <div class="readout">
-    <span><span class="dot" style="background:var(--sun)"></span>太阳 <b id="sunState">—</b> · 日出 <i id="sunRise">—</i> · 日落 <i id="sunSet">—</i></span>
-    <span><span class="dot" style="background:var(--moon)"></span>月亮 <b id="moonState">—</b> · 月出 <i id="moonRise">—</i> · 月落 <i id="moonSet">—</i></span>
+    <span><span class="dot" style="background:var(--sun)"></span>太阳 <b id="sunState">—</b> · <span id="sunPair">—</span></span>
+    <span><span class="dot" style="background:var(--moon)"></span>月亮 <b id="moonState">—</b> · <span id="moonPair">—</span></span>
   </div>
 
   <div class="note">
@@ -239,6 +241,18 @@ function hm(t){
   if (t == null) return "—";
   const d = new Date((t + TZ) * 1000);
   return pad(d.getUTCHours()) + ":" + pad(d.getUTCMinutes());
+}
+
+/* 两个时刻按「一天里的先后」排，不按「出/落」硬排：
+   月落早于月出的时候先写月落，读起来才顺着钟点走 */
+function pairText(a, b, nameA, nameB){
+  if (a == null && b == null) return "—";
+  if (a == null) return nameB + " " + hm(b);
+  if (b == null) return nameA + " " + hm(a);
+  const ofDay = function(t){ return (t + TZ) % DAY; };
+  return ofDay(a) <= ofDay(b)
+    ? nameA + " " + hm(a) + " · " + nameB + " " + hm(b)
+    : nameB + " " + hm(b) + " · " + nameA + " " + hm(a);
 }
 function clockText(t){
   const d = new Date((t + TZ) * 1000);
@@ -465,11 +479,9 @@ const el = {
   scrub: document.getElementById("scrub"),
   clock: document.getElementById("clock"),
   sunState: document.getElementById("sunState"),
-  sunRise: document.getElementById("sunRise"),
-  sunSet: document.getElementById("sunSet"),
+  sunPair: document.getElementById("sunPair"),
   moonState: document.getElementById("moonState"),
-  moonRise: document.getElementById("moonRise"),
-  moonSet: document.getElementById("moonSet")
+  moonPair: document.getElementById("moonPair")
 };
 
 el.scrub.min = MIN_T;
@@ -482,11 +494,9 @@ function paint(){
   el.clock.textContent = clockText(state.now);
 
   el.sunState.textContent  = r.sun.state;
-  el.sunRise.textContent   = hm(r.sunToday.rise);
-  el.sunSet.textContent    = hm(r.sunToday.set);
+  el.sunPair.textContent   = pairText(r.sunToday.rise, r.sunToday.set, "日出", "日落");
   el.moonState.textContent = r.moon.state;
-  el.moonRise.textContent  = hm(r.moonToday.rise);
-  el.moonSet.textContent   = hm(r.moonToday.set);
+  el.moonPair.textContent  = pairText(r.moonToday.rise, r.moonToday.set, "月出", "月落");
 }
 
 let rafId = 0, prevTs = 0;
