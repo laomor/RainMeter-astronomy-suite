@@ -214,9 +214,9 @@ y = HorizonY - (HorizonY - apex) * (1 - (2t - 1)²)
 效果就是：升/落的时候在地平线，到中间（`t=0.5`）飞到顶点，半夜（`t=1.5`）沉到底点。太阳的顶点高度会根据白天时长动态变（夏天高，冬天低）；月亮我偷懒了，固定高度没做动态。
 
 **2. X 轴：八仙过海，各显神通**
-- **Trajectory Viewer**：`x = 起点 + (现在 - 今天零点) / 每像素秒数`。把一整天硬塞进时间轴里，零点重置。
-- **Event Tracker**：算个时间窗口，把当前时间固定在左边一点，然后把事件一个接一个往后排。
-- **Position Simulator**：这个最特殊，非要找齐“四个事件”拼成一个完整周期，再把当前时间映射到整条轴上。
+- [**Trajectory Viewer**](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Trajectory/)：`x = 起点 + (现在 - 今天零点) / 每像素秒数`。把一整天硬塞进时间轴里，零点重置。
+- [**Event Tracker**](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Event/)：算个时间窗口，把当前时间固定在左边一点，然后把事件一个接一个往后排。
+- [**Position Simulator**](https://laomor.github.io/RainMeter-astronomy-suite/EffectPreviewImage_Position/)：这个最特殊，非要找齐“四个事件”拼成一个完整周期，再把当前时间映射到整条轴上。
   > **重点说说：为什么非得找四个事件？**
   > <br>因为天体有四个阶段：不可见上升、可见上升、可见下降、不可见下降。
   > <br>如果只看前后两个事件，遇到某些时间点（比如晚上 22 点，此时太阳最低点在次日 0:20 左右），系统可能会直接把次日 0:20 当成 X 轴的新起点。这下坏了，根据当前时间算出来的坐标会跑到极左端，图标直接“飞出屏幕”。
